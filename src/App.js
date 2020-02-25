@@ -26,10 +26,6 @@ class App extends React.Component {
   }
 
   updateToken = (token) => {
-    console.log('\n', '===============================================', '\n');
-    console.log('update');
-    console.log(token);
-    console.log('\n', '===============================================', '\n');
     this.setState({
       token
     });
@@ -42,7 +38,6 @@ class App extends React.Component {
   render() {
     return (
       <Router>
-        {this.state.token}
         <Switch>
           <Layout token={this.state.token}>
             <Route exact path="/" >

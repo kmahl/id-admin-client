@@ -1,0 +1,35 @@
+.header {
+  display: flex;
+  justify-content: space-evenly;
+}
+
+.collapse-button {
+  background-color: transparent;
+  position: relative;
+  width: 0px;
+  overflow: visible;
+
+  .trigger {
+    margin-top: 30px;
+    position: absolute;
+    background-color: #959ca3;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    margin-left: -20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 30px;
+    color: #001529;
+  }
+}
+
+.logo {
+  width: 120px;
+  height: 31px;
+  background: rgba(255, 255, 255, 0.2);
+  margin: 16px 28px 16px 0;
+  float: left;
+}
+
