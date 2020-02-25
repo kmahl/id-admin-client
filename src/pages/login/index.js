@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AUTH_TOKEN } from '../../constants';
 import { Mutation } from 'react-apollo';
 import gql from 'graphql-tag';
@@ -16,42 +16,46 @@ const LOGIN = gql`
   }
 `;
 
-class Login extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      login: true, // switch between Login and SignUp
-      user: '',
-      password: '',
-    };
-  }
+const Login = (props) => {
+  const [user, setUser] = useState('');
+  const [password, setPassword] = useState('');
+  const [spinning, setSpin] = useState(false);
 
-  componentWillMount() {
+  useEffect(() => {
     const token = localStorage.getItem(AUTH_TOKEN);
     if (token) {
-      this.props.history.push(`/`);
+      props.history.push(`/`);
     } else {
-      this.props.updateToken();
+      props.updateToken();
     }
-  }
+  }, []);
 
-  render() {
-    const { login, user, password } = this.state;
-    return (
-      <div className="login-section">
+  const _confirm = async data => {
+    const { token } = data.login;
+    _saveUserData(token);
+    props.history.push(`/`);
+  };
+
+  const _saveUserData = token => {
+    props.save(token);
+  };
+
+  return (
+    <div className="login-section">
+      <Spin spinning={spinning} >
         <h2 className="header">Bienvenido</h2>
         <div className="login-container">
           <Input
             prefix={<Icon type="user" style={{ color: 'rgba(0,0,0,.25)' }} />}
             value={user}
-            onChange={e => this.setState({ user: e.target.value })}
+            onChange={e => setUser(e.target.value)}
             type="text"
             placeholder="User"
           />
           <Input
             prefix={<Icon type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />}
             value={password}
-            onChange={e => this.setState({ password: e.target.value })}
+            onChange={e => setPassword(e.target.value)}
             type="password"
             placeholder="Password"
           />
@@ -60,28 +64,18 @@ class Login extends Component {
           <Mutation
             mutation={LOGIN}
             variables={{ user, password }}
-            onCompleted={data => this._confirm(data)}
+            onCompleted={data => _confirm(data)}
           >
             {mutation => (
-              <Button type="primary" onClick={mutation} block>
+              <Button type="primary" onClick={() => { setSpin(true); return mutation(); }} block>
                 Login
               </Button>
             )}
           </Mutation>
         </div>
-      </div>
-    );
-  }
-
-  _confirm = async data => {
-    const { token } = data.login;
-    this._saveUserData(token);
-    this.props.history.push(`/`);
-  }
-
-  _saveUserData = token => {
-    this.props.save(token);
-  }
-}
+      </Spin>
+    </div>
+  );
+};
 
 export default withRouter(Login);
