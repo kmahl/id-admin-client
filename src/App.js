@@ -1,26 +1,63 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useState, useEffect } from 'react';
+import Layout from './components/layout';
+import {
+  BrowserRouter as Router,
+  Switch,
+  Route,
+  Redirect,
+} from "react-router-dom";
+/* COMPONENTS */
+import PrivateRoute from './components/pritaveRouter';
+/* PAGES */
+import Home from './pages/home';
+import Client from './pages/client';
+import Booking from './pages/booking';
+import Login from './pages/login';
+import { withRouter } from "react-router";
+import { AUTH_TOKEN } from './constants';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
-}
+class App extends React.Component {
+  constructor(props) {
+    super(props);
+    this.updateToken = this.updateToken.bind(this);
+    this.state = {
+      token: localStorage.getItem(AUTH_TOKEN) || null,
+    };
+  }
+
+  updateToken = (token) => {
+    console.log('\n', '===============================================', '\n');
+    console.log('update');
+    console.log(token);
+    console.log('\n', '===============================================', '\n');
+    this.setState({
+      token
+    });
+  }
+  _saveUserData = token => {
+    localStorage.setItem(AUTH_TOKEN, token);
+    this.updateToken(token);
+  }
+
+  render() {
+    return (
+      <Router>
+        {this.state.token}
+        <Switch>
+          <Layout token={this.state.token}>
+            <Route exact path="/" >
+              <Home token={this.state.token} updateToken={this.updateToken} />
+            </Route>
+            <Route exact path="/booking" component={withRouter(Booking)} />
+            <Route exact path="/client" component={withRouter(Client)} />
+            <Route exact path="/login" >
+              <Login save={this._saveUserData} updateToken={this.updateToken}  />
+            </Route>
+          </Layout>
+        </Switch>
+      </Router >
+    );
+  }
+};
 
 export default App;
