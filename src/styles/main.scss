@@ -1,10 +1,22 @@
 /* EXTERNAL */
 @import '~antd/dist/antd.css';
+@import '~@fullcalendar/core/main.css';
+@import '~@fullcalendar/daygrid/main.css';
+@import '~@fullcalendar/timegrid/main.css';
+
 /* VARIABLES */
 @import './variables';
+
 /* COMPONENTS */
 @import '../components/layout/styles';
+@import '../components/colorSelector/styles';
+
 /* SECTIONS */
 @import '../pages/login/styles';
 @import '../pages/home/styles';
 @import '../pages/client/styles';
+@import '../pages/booking/styles';
+
+
+/* OVERRIDES */
+@import './overrides';

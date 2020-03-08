@@ -4,14 +4,14 @@ import { withRouter } from "react-router";
 /* components */
 import { Icon, Input, Button, Spin, Table, Modal, Form, DatePicker, Select, notification } from 'antd';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
-const { confirm } = Modal;
-
 import Title from '../../components/title';
 import Notification from '../../components/notification';
+import { colors, ColorRow } from '../../components/colorSelector';
+const { confirm } = Modal;
 
 /* data */
 import { getToken } from '../../query';
-import { GET_CLIENTS, CREATE_CLIENT, UPDATE_CLIENT, DELETE_CLIENT } from '../../query/client';
+import { GET_EMPLOYEES, CREATE_EMPLOYEE, UPDATE_EMPLOYEE, DELETE_EMPLOYEE } from '../../query/employee';
 import { GET_SUBSIDIARY_NAMES } from '../../query/subsidiary';
 /* Time */
 import moment from 'moment';
@@ -20,26 +20,26 @@ import 'moment-timezone';
 import { columns } from './tableConfig';
 
 
-/* CLIENT COMPONENT */
-const Client = ({ history, form }) => {
+/* employee COMPONENT */
+const employee = ({ history, form }) => {
   const { token } = getToken();
 
-  const { loading, error, data } = useQuery(GET_CLIENTS);
+  const { loading, error, data } = useQuery(GET_EMPLOYEES);
   const { loading: loadingSubsidiary, error: errorSubsidiary, data: dataSubsidiary } = useQuery(GET_SUBSIDIARY_NAMES);
 
   const [spinning, setSpin] = useState(false);
   const [showModal, setShowModal] = useState(false);
-  const [modalTitle, setModalTitle] = useState('Nuevo cliente');
-  const [newClient, setNewClient] = useState(true);
+  const [modalTitle, setModalTitle] = useState('Nuevo empleado');
+  const [newEmployee, setNewEmployee] = useState(true);
 
-  const [createClient] = useMutation(CREATE_CLIENT, {
-    refetchQueries: [{ query: GET_CLIENTS }],
+  const [createEmployee] = useMutation(CREATE_EMPLOYEE, {
+    refetchQueries: [{ query: GET_EMPLOYEES }],
   });
-  const [updateClient] = useMutation(UPDATE_CLIENT, {
-    refetchQueries: [{ query: GET_CLIENTS }],
+  const [updateEmployee] = useMutation(UPDATE_EMPLOYEE, {
+    refetchQueries: [{ query: GET_EMPLOYEES }],
   });
-  const [deleteClient] = useMutation(DELETE_CLIENT, {
-    refetchQueries: [{ query: GET_CLIENTS }],
+  const [deleteEmployee] = useMutation(DELETE_EMPLOYEE, {
+    refetchQueries: [{ query: GET_EMPLOYEES }],
   });
 
   const { getFieldDecorator, validateFields, setFieldsValue, setFields, resetFields } = form;
@@ -61,11 +61,10 @@ const Client = ({ history, form }) => {
     <Select style={{ width: 70 }}>
       <Select.Option value="54">+54</Select.Option>
       <Select.Option value="58">+58</Select.Option>
-
     </Select>,
   );
 
-  const saveClient = (e, isNew) => {
+  const saveEmployee = (e, isNew) => {
     e.preventDefault();
     setSpin(true);
     validateFields(async (err, values) => {
@@ -81,11 +80,11 @@ const Client = ({ history, form }) => {
           };
           let response;
           if (isNew) {
-            response = await createClient({ variables });
-            Notification(`Cliente ${response.data.createClient.name} guardado correctamente`, 'success');
+            response = await createEmployee({ variables });
+            Notification(`Empleado ${response.data.createEmployee.name} guardado correctamente`, 'success');
           } else {
-            response = await updateClient({ variables });
-            Notification(`Cliente ${response.data.updateClient.name} actualizado correctamente`, 'success');
+            response = await updateEmployee({ variables });
+            Notification(`Empleado ${response.data.updateEmployee.name} actualizado correctamente`, 'success');
 
           }
           resetFields();
@@ -98,16 +97,16 @@ const Client = ({ history, form }) => {
     return setSpin(false);
   };
 
-  const createNewClient = () => {
+  const createNewEmployee = () => {
     setShowModal(true);
-    setNewClient(true);
-    setModalTitle('Nuevo cliente');
+    setNewEmployee(true);
+    setModalTitle('Nuevo empleado');
   };
 
   const editData = (data) => {
     setShowModal(true);
-    setNewClient(false);
-    setModalTitle('Editar cliente');
+    setNewEmployee(false);
+    setModalTitle('Editar empleado');
     const date = new Date(parseInt(data.birth_date));
     const birth_date = moment.utc(date).isValid() ? moment.utc(date, 'DD/MM/YYYY') : null;
     setFieldsValue({
@@ -118,6 +117,7 @@ const Client = ({ history, form }) => {
       state: data.state,
       city: data.city,
       address: data.address,
+      color: data.color,
       subsidiaryId: data.subsidiary.id,
       birth_date
     });
@@ -125,13 +125,13 @@ const Client = ({ history, form }) => {
 
   const deleteData = (item) => {
     confirm({
-      title: `Quieres borrar el cliente ${item.name}?`,
+      title: `Quieres borrar el empleado ${item.name}?`,
       icon: <ExclamationCircleOutlined />,
       content: '',
       async onOk() {
         try {
-          const client = await deleteClient({ variables: { id: item.id } });
-          Notification(`Usuario ${client.data.deleteClient.name} Eliminado`, 'warning');
+          const employee = await deleteEmployee({ variables: { id: item.id } });
+          Notification(`Usuario ${employee.data.deleteEmployee.name} Eliminado`, 'warning');
         } catch (error) {
           Notification(error.message, 'error');
         };
@@ -147,31 +147,31 @@ const Client = ({ history, form }) => {
 
 
   return (
-    <div className="client-section">
+    <div className="employee-section">
       <Spin spinning={spinning} >
-        <div className="table-header client-header">
-          <Title title="Lista de clientes"></Title>
-          <Button type="primary" onClick={createNewClient}>Nuevo <Icon type="plus" /></Button>
+        <div className="table-header employee-header">
+          <Title title="Lista de empleados"></Title>
+          <Button type="primary" onClick={createNewEmployee}>Nuevo <Icon type="plus" /></Button>
         </div>
-        <Table /* rowSelection={rowSelection} */ dataSource={data.clients} columns={columns(editData, deleteData)} rowKey={record => record.id} />
+        <Table /* rowSelection={rowSelection} */ dataSource={data.employees} columns={columns(editData, deleteData)} rowKey={record => record.id} />
 
         <Modal
           title={modalTitle}
           visible={showModal}
-          onOk={(e) => { saveClient(e, newClient); }}
+          onOk={(e) => { saveEmployee(e, newEmployee); }}
           okText="Guardar"
           cancelText="Cancelar"
           onCancel={closeModal}
           width="50%"
         >
-          <Form onSubmit={saveClient}>
+          <Form onSubmit={saveEmployee}>
             <div className="group">
               {/* name */}
               <Form.Item
                 label="Nombre completo"
               >
                 {getFieldDecorator('name', {
-                  rules: [{ required: true, message: 'Completa el campo!', whitespace: true }],
+                  rules: [{ required: true, message: 'Completa el campo', whitespace: true }],
                 })(<Input />)}
               </Form.Item>
               {/* email */}
@@ -201,6 +201,17 @@ const Client = ({ history, form }) => {
                 {getFieldDecorator('birth_date', {
                 })(<DatePicker format="DD/MM/YYYY" />)}
               </Form.Item>
+              {/* Color */}
+              <Form.Item label="Color" style={{ width: '70%' }}>
+                {getFieldDecorator('color', {
+                  rules: [{ required: true, message: 'Completa el campo', whitespace: true }],
+                })(<Select className="color-selector">
+                  {colors.map(color =>
+                    <Select.Option key={color.value} value={color.value}>
+                      <ColorRow color={color} />
+                    </Select.Option>)}
+                </Select >)}
+              </Form.Item>
             </div>
             <div className="group">
               {/* state */}
@@ -223,13 +234,13 @@ const Client = ({ history, form }) => {
                 label="Dirección"
               >
                 {getFieldDecorator('address', {
-                  rules: [{ required: true, message: 'Completa el campo!', whitespace: true }],
+                  rules: [{ required: true, message: 'Completa el campo', whitespace: true }],
                 })(<Input />)}
               </Form.Item>
               {/* subsidiary */}
               <Form.Item label="Sucursal">
                 {getFieldDecorator('subsidiaryId', {
-                  rules: [{ required: true, message: 'Completa el campo!', whitespace: true }],
+                  rules: [{ required: true, message: 'Completa el campo', whitespace: true }],
                 })
                   (dataSubsidiary.subsidiaries ?
                     <Select>
@@ -238,7 +249,7 @@ const Client = ({ history, form }) => {
               </Form.Item>
             </div>
             <Form.Item>
-              <Button onClick={saveClient} htmlType="submit" style={{ display: 'none' }}></Button>
+              <Button onClick={saveEmployee} htmlType="submit" style={{ display: 'none' }}></Button>
             </Form.Item>
           </Form>
         </Modal>
@@ -248,4 +259,4 @@ const Client = ({ history, form }) => {
   );
 };
 
-export default Form.create({ name: 'modal-client-form' })(withRouter(Client));
+export default Form.create({ name: 'modal-employee-form' })(withRouter(employee));

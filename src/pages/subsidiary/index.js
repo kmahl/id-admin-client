@@ -11,35 +11,30 @@ import Notification from '../../components/notification';
 
 /* data */
 import { getToken } from '../../query';
-import { GET_CLIENTS, CREATE_CLIENT, UPDATE_CLIENT, DELETE_CLIENT } from '../../query/client';
-import { GET_SUBSIDIARY_NAMES } from '../../query/subsidiary';
-/* Time */
-import moment from 'moment';
-import 'moment-timezone';
+import { GET_SUBSIDIARIES, CREATE_SUBSIDIARY, UPDATE_SUBSIDIARY, DELETE_SUBSIDIARY } from '../../query/subsidiary';
 /* config */
 import { columns } from './tableConfig';
 
 
-/* CLIENT COMPONENT */
-const Client = ({ history, form }) => {
+/* SUBSIDIARY COMPONENT */
+const Subsidiary = ({ history, form }) => {
   const { token } = getToken();
 
-  const { loading, error, data } = useQuery(GET_CLIENTS);
-  const { loading: loadingSubsidiary, error: errorSubsidiary, data: dataSubsidiary } = useQuery(GET_SUBSIDIARY_NAMES);
+  const { loading: loadingSubsidiary, error: errorSubsidiary, data } = useQuery(GET_SUBSIDIARIES);
 
   const [spinning, setSpin] = useState(false);
   const [showModal, setShowModal] = useState(false);
-  const [modalTitle, setModalTitle] = useState('Nuevo cliente');
-  const [newClient, setNewClient] = useState(true);
+  const [modalTitle, setModalTitle] = useState('Nueva sucursal');
+  const [newSubsidiary, setNewSubsidiary] = useState(true);
 
-  const [createClient] = useMutation(CREATE_CLIENT, {
-    refetchQueries: [{ query: GET_CLIENTS }],
+  const [createSubsidiary] = useMutation(CREATE_SUBSIDIARY, {
+    refetchQueries: [{ query: GET_SUBSIDIARIES }],
   });
-  const [updateClient] = useMutation(UPDATE_CLIENT, {
-    refetchQueries: [{ query: GET_CLIENTS }],
+  const [updateSubsidiary] = useMutation(UPDATE_SUBSIDIARY, {
+    refetchQueries: [{ query: GET_SUBSIDIARIES }],
   });
-  const [deleteClient] = useMutation(DELETE_CLIENT, {
-    refetchQueries: [{ query: GET_CLIENTS }],
+  const [deleteSubsidiary] = useMutation(DELETE_SUBSIDIARY, {
+    refetchQueries: [{ query: GET_SUBSIDIARIES }],
   });
 
   const { getFieldDecorator, validateFields, setFieldsValue, setFields, resetFields } = form;
@@ -51,8 +46,7 @@ const Client = ({ history, form }) => {
   }, []);
 
   /* TODO: dejar el spinner fullscreen */
-  if (loading || loadingSubsidiary) return <div><Spin spinning={true}></Spin></div>;
-  if (error) Notification(error.message, 'error');
+  if (loadingSubsidiary) return <div><Spin spinning={true}></Spin></div>;
   if (errorSubsidiary) Notification(errorSubsidiary.message, 'error');
 
   const prefixSelector = getFieldDecorator('prefix', {
@@ -65,7 +59,7 @@ const Client = ({ history, form }) => {
     </Select>,
   );
 
-  const saveClient = (e, isNew) => {
+  const saveSubsidiary = (e, isNew) => {
     e.preventDefault();
     setSpin(true);
     validateFields(async (err, values) => {
@@ -76,16 +70,15 @@ const Client = ({ history, form }) => {
             city: values.city || null,
             state: values.state || null,
             phone: (values.phone && `+${values.prefix}${values.phone}`) || null,
-            birth_date: (values.birth_date && values.birth_date.format('YYYY-MM-DD')) || null,
             country: "Argentina",
           };
           let response;
           if (isNew) {
-            response = await createClient({ variables });
-            Notification(`Cliente ${response.data.createClient.name} guardado correctamente`, 'success');
+            response = await createSubsidiary({ variables });
+            Notification(`Sucursal ${response.data.createSubsidiary.name} guardado correctamente`, 'success');
           } else {
-            response = await updateClient({ variables });
-            Notification(`Cliente ${response.data.updateClient.name} actualizado correctamente`, 'success');
+            response = await updateSubsidiary({ variables });
+            Notification(`Sucursal ${response.data.updateSubsidiary.name} actualizado correctamente`, 'success');
 
           }
           resetFields();
@@ -98,46 +91,41 @@ const Client = ({ history, form }) => {
     return setSpin(false);
   };
 
-  const createNewClient = () => {
+  const createNewSubsidiary = () => {
     setShowModal(true);
-    setNewClient(true);
-    setModalTitle('Nuevo cliente');
+    setNewSubsidiary(true);
+    setModalTitle('Nueva sucursal');
   };
 
   const editData = (data) => {
     setShowModal(true);
-    setNewClient(false);
-    setModalTitle('Editar cliente');
-    const date = new Date(parseInt(data.birth_date));
-    const birth_date = moment.utc(date).isValid() ? moment.utc(date, 'DD/MM/YYYY') : null;
+    setNewSubsidiary(false);
+    setModalTitle('Editar Sucursal');
     setFieldsValue({
       prefix: data.phone ? data.phone.slice(1, 3) : '54',
       name: data.name,
-      email: data.email,
       phone: data.phone ? data.phone.slice(3, data.phone.length) : '',
       state: data.state,
       city: data.city,
       address: data.address,
-      subsidiaryId: data.subsidiary.id,
-      birth_date
     });
   };
 
-  const deleteData = (item) => {
-    confirm({
-      title: `Quieres borrar el cliente ${item.name}?`,
+   const deleteData = (item) => {
+/*     confirm({
+      title: `Quieres borrar la  ${item.name}?`,
       icon: <ExclamationCircleOutlined />,
       content: '',
       async onOk() {
         try {
-          const client = await deleteClient({ variables: { id: item.id } });
-          Notification(`Usuario ${client.data.deleteClient.name} Eliminado`, 'warning');
+          const subsidiary = await deletesubsidiary({ variables: { id: item.id } });
+          Notification(`Usuario ${subsidiary.data.deletesubsidiary.name} Eliminado`, 'warning');
         } catch (error) {
           Notification(error.message, 'error');
         };
       },
       onCancel() { },
-    });
+    }); */
   };
 
   const closeModal = e => {
@@ -145,48 +133,32 @@ const Client = ({ history, form }) => {
     resetFields();
   };
 
-
   return (
-    <div className="client-section">
+    <div className="subsidiary-section">
       <Spin spinning={spinning} >
-        <div className="table-header client-header">
-          <Title title="Lista de clientes"></Title>
-          <Button type="primary" onClick={createNewClient}>Nuevo <Icon type="plus" /></Button>
+        <div className="table-header subsidiary-header">
+          <Title title="Lista de Sucursales"></Title>
+          <Button type="primary" onClick={(e) => setShowModal(true)}>Nuevo <Icon type="plus" /></Button>
         </div>
-        <Table /* rowSelection={rowSelection} */ dataSource={data.clients} columns={columns(editData, deleteData)} rowKey={record => record.id} />
+        <Table /* rowSelection={rowSelection} */ dataSource={data.subsidiaries} columns={columns(editData, deleteData)} rowKey={record => record.id} />
 
         <Modal
           title={modalTitle}
           visible={showModal}
-          onOk={(e) => { saveClient(e, newClient); }}
+          onOk={(e) => { saveSubsidiary(e, newSubsidiary); }}
           okText="Guardar"
           cancelText="Cancelar"
           onCancel={closeModal}
           width="50%"
         >
-          <Form onSubmit={saveClient}>
+          <Form onSubmit={saveSubsidiary}>
             <div className="group">
               {/* name */}
               <Form.Item
-                label="Nombre completo"
+                label="Nombre"
               >
                 {getFieldDecorator('name', {
                   rules: [{ required: true, message: 'Completa el campo!', whitespace: true }],
-                })(<Input />)}
-              </Form.Item>
-              {/* email */}
-              <Form.Item label="Correo">
-                {getFieldDecorator('email', {
-                  rules: [
-                    {
-                      type: 'email',
-                      message: 'The input is not valid E-mail!',
-                    },
-                    {
-                      required: true,
-                      message: 'Please input your E-mail!',
-                    },
-                  ],
                 })(<Input />)}
               </Form.Item>
             </div>
@@ -195,11 +167,6 @@ const Client = ({ history, form }) => {
               <Form.Item label="Teléfono">
                 {getFieldDecorator('phone', {
                 })(<Input addonBefore={prefixSelector} style={{ width: '100%' }} />)}
-              </Form.Item>
-              {/* birthdate */}
-              <Form.Item label="Cumpleaños">
-                {getFieldDecorator('birth_date', {
-                })(<DatePicker format="DD/MM/YYYY" />)}
               </Form.Item>
             </div>
             <div className="group">
@@ -226,26 +193,15 @@ const Client = ({ history, form }) => {
                   rules: [{ required: true, message: 'Completa el campo!', whitespace: true }],
                 })(<Input />)}
               </Form.Item>
-              {/* subsidiary */}
-              <Form.Item label="Sucursal">
-                {getFieldDecorator('subsidiaryId', {
-                  rules: [{ required: true, message: 'Completa el campo!', whitespace: true }],
-                })
-                  (dataSubsidiary.subsidiaries ?
-                    <Select>
-                      {dataSubsidiary.subsidiaries.map(subsidiary => <Select.Option key={subsidiary.id} value={subsidiary.id}>{subsidiary.name}</Select.Option>)}
-                    </Select> : <span className="alert-empty">Agrege Sucursales <a onClick={() => history.push('./subsidiary')}>Aqui!</a></span>)}
-              </Form.Item>
             </div>
             <Form.Item>
-              <Button onClick={saveClient} htmlType="submit" style={{ display: 'none' }}></Button>
+              <Button onClick={saveSubsidiary} htmlType="submit" style={{ display: 'none' }}></Button>
             </Form.Item>
           </Form>
         </Modal>
       </Spin>
-
-    </div >
+    </div>
   );
 };
 
-export default Form.create({ name: 'modal-client-form' })(withRouter(Client));
+export default Form.create({ name: 'modal-subsidiary-form' })(withRouter(Subsidiary));

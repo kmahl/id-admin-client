@@ -1,19 +1,73 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from "react-router-dom";
-import { Layout, Menu, Icon, Button } from 'antd';
+import {
+  Layout,
+  Menu,
+  Icon,
+  Button
+} from 'antd';
+import {
+  HomeOutlined,
+  CalendarOutlined,
+  IdcardOutlined,
+  ShopOutlined,
+  UserOutlined,
+  SettingOutlined
+} from '@ant-design/icons';
 const { Header, Content, Sider } = Layout;
+
+import { getToken } from '../../query';
 import { withRouter } from "react-router";
 
-const MainLayout = ({ children, token, history }) => {
+const MainLayout = ({ children, history }) => {
   const [collapsed, setCollapse] = useState(false);
   const className = history && history.location && history.location.pathname.slice(1);
+  const [selectedKey, setSelectedKey] = useState('/');
+  const { token, client } = getToken();
   const logout = () => {
     localStorage.clear();
+    client.writeData({ data: { token: null } });
     history.push('/login');
   };
 
+  useEffect(() => {
+    setSelectedKey(history.location.pathname);
+  }, [history.location]);
+
+  const menu = [
+    {
+      route: '/',
+      icon: <HomeOutlined />,
+      displayName: 'Inicio',
+    },
+    {
+      route: '/booking',
+      icon: <CalendarOutlined />,
+      displayName: 'Reservas',
+    },
+    {
+      route: '/client',
+      icon: <IdcardOutlined />,
+      displayName: 'Clientes',
+    },
+    {
+      route: '/subsidiary',
+      icon: <ShopOutlined />,
+      displayName: 'Sucursales',
+    },
+    {
+      route: '/employee',
+      icon: <UserOutlined />,
+      displayName: 'Empleados',
+    },
+    {
+      route: '/configuration',
+      icon: <SettingOutlined />,
+      displayName: 'Configuración',
+    },
+  ];
   return (
-    <Layout style={{ minHeight: '100vh' }}>
+    <Layout style={{ minHeight: '100vh', height: '100vh' }}>
       <Header className="c">
         <div className="logo">logo</div>
         {/* TODO: nombre, avatar, opciones */}
@@ -34,28 +88,21 @@ const MainLayout = ({ children, token, history }) => {
             }}>
             <Menu
               mode="inline"
-              defaultSelectedKeys={['1']}
+              defaultSelectedKeys={['/']}
               style={{ height: '100%', borderRight: 0 }}
               theme="dark"
+              selectedKeys={[selectedKey]}
             >
-              <Menu.Item key="1">
-                <Link to="/">
-                  <Icon type="pie-chart" />
-                  <span>Home</span>
-                </Link>
-              </Menu.Item>
-              <Menu.Item key="2">
-                <Link to="/booking">
-                  <Icon type="pie-chart" />
-                  <span>Booking</span>
-                </Link>
-              </Menu.Item>
-              <Menu.Item key="3">
-                <Link to="/client">
-                  <Icon type="pie-chart" />
-                  <span>Client</span>
-                </Link>
-              </Menu.Item>
+              {
+                menu.map(item =>
+                  <Menu.Item key={item.route} onClick={() => setSelectedKey(item.route)}>
+                    <Link className="menu-item" to={item.route}>
+                      {item.icon}
+                      <span className="title">{item.displayName}</span>
+                    </Link>
+                  </Menu.Item>
+                )
+              }
             </Menu>
           </Sider>
           <div className="collapse-button">

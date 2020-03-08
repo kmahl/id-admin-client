@@ -1,0 +1,29 @@
+.group {
+  display: flex;
+  justify-content: space-between;
+
+  .ant-form-item {
+    width: 100%;
+    margin: 0 10px;
+  }
+}
+
+.alert-empty {
+  color: '#f5222d';
+
+  a {
+    color: '#f5222d';
+    text-decoration: none;
+  }
+}
+
+.table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 20px 0 20px 20px;
+}
+
+.ant-calendar-picker {
+  width: 100%;
+}

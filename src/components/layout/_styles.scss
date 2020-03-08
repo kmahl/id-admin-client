@@ -10,17 +10,17 @@
   overflow: visible;
 
   .trigger {
-    margin-top: 30px;
+    margin-top: 40px;
     position: absolute;
     background-color: #959ca3;
-    width: 30px;
-    height: 30px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     margin-left: -20px;
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 30px;
+    font-size: 40px;
     color: #001529;
   }
 }
@@ -33,3 +33,13 @@
   float: left;
 }
 
+.ant-menu-item {
+  .menu-item {
+    span {
+      font-size: 18px;
+    }
+    .title{
+      font-size: 16px;
+    }
+  }
+}

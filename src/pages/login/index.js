@@ -4,6 +4,7 @@ import { useMutation } from '@apollo/react-hooks';
 import gql from 'graphql-tag';
 import { withRouter } from "react-router";
 import { Form, Icon, Input, Button, Spin } from 'antd';
+import { getToken } from '../../query';
 
 const LOGIN = gql`
   mutation Login($user: String!, $password: String!) {
@@ -16,27 +17,26 @@ const LOGIN = gql`
   }
 `;
 
-const Login = (props) => {
+const Login = ({ history, form }) => {
   const [password, setPassword] = useState({
     value: '',
     help: '',
     validateStatus: '',
   });
   const [spinning, setSpin] = useState(false);
-
+  const { token, loading: tokenLoading, error, client } = getToken();
   const [login] = useMutation(LOGIN);
 
-  const { getFieldDecorator, validateFields } = props.form;
+  const { getFieldDecorator, validateFields } = form;
 
-  useEffect(() => {
-    const token = localStorage.getItem(AUTH_TOKEN);
-    if (token) {
-      props.history.push(`/`);
-    } else {
-      props.updateToken();
-    }
-  }, []);
-
+  if (tokenLoading) return <Spin spinning={true}></Spin>;
+  if (error) {
+    history.push('/login');
+    return `Error! ${error.message}`;
+  };
+  if (token) {
+    history.push(`/`);
+  }
 
   const onSubmit = e => {
     e.preventDefault();
@@ -44,7 +44,7 @@ const Login = (props) => {
     validateFields(async (err, { username }) => {
       if (!err) {
         try {
-          if(password.value === ''){
+          if (password.value === '') {
             setPassword({
               validateStatus: 'error',
               help: 'Ingresa la contraseña!',
@@ -54,8 +54,9 @@ const Login = (props) => {
           }
           const { data } = await login({ variables: { user: username, password: password.value } });
           const { token } = data.login;
-          props.save(token);
-          props.history.push(`/`);
+          localStorage.setItem(AUTH_TOKEN, token);
+          client.writeData({ data: { token } });
+          history.push(`/`);
           return;
         } catch (error) {
           setPassword({
@@ -89,16 +90,16 @@ const Login = (props) => {
               )}
             </Form.Item>
             <Form.Item
+              hasFeedback
               required={true}
               help={password.help}
               validateStatus={password.validateStatus}
             >
-              <Input
-                prefix={<Icon type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />}
-                type="password"
+              <Input.Password
+                placeholder="Password"
                 onChange={e => setPassword({ value: e.target.value })}
                 value={password.value}
-                placeholder="Password"
+                prefix={<Icon type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />}
               />
             </Form.Item>
           </div>
