@@ -17,6 +17,10 @@ const GET_EMPLOYEES = gql`
         id
         name
       }
+      services{
+        id
+        name
+      }
     }
   }
 `;

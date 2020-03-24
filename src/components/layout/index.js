@@ -12,7 +12,8 @@ import {
   IdcardOutlined,
   ShopOutlined,
   UserOutlined,
-  SettingOutlined
+  SettingOutlined,
+  ScissorOutlined
 } from '@ant-design/icons';
 const { Header, Content, Sider } = Layout;
 
@@ -59,6 +60,11 @@ const MainLayout = ({ children, history }) => {
       route: '/employee',
       icon: <UserOutlined />,
       displayName: 'Empleados',
+    },
+    {
+      route: '/service',
+      icon: <ScissorOutlined />,
+      displayName: 'Servicios',
     },
     {
       route: '/configuration',

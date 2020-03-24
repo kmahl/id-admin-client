@@ -13,6 +13,7 @@ import Client from './pages/client';
 import Booking from './pages/booking';
 import Subsidiary from './pages/subsidiary';
 import Employee from './pages/employee';
+import Service from './pages/service';
 import Configuration from './pages/configuration';
 import Login from './pages/login';
 
@@ -35,6 +36,9 @@ const App = (props) => {
           </Route>
           <Route exact path="/employee">
              <Employee />
+          </Route>
+          <Route exact path="/service">
+             <Service />
           </Route>
           <Route exact path="/configuration">
              <Configuration />

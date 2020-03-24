@@ -42,7 +42,7 @@ const employee = ({ history, form }) => {
     refetchQueries: [{ query: GET_EMPLOYEES }],
   });
 
-  const { getFieldDecorator, validateFields, setFieldsValue, setFields, resetFields } = form;
+  const { getFieldDecorator, validateFields, setFieldsValue, resetFields } = form;
 
   useEffect(() => {
     if (!token) {
@@ -125,13 +125,13 @@ const employee = ({ history, form }) => {
 
   const deleteData = (item) => {
     confirm({
-      title: `Quieres borrar el empleado ${item.name}?`,
+      title: `Quieres borrar el empleado: ${item.name}?`,
       icon: <ExclamationCircleOutlined />,
       content: '',
       async onOk() {
         try {
           const employee = await deleteEmployee({ variables: { id: item.id } });
-          Notification(`Usuario ${employee.data.deleteEmployee.name} Eliminado`, 'warning');
+          Notification(`Empleado ${employee.data.deleteEmployee.name} Eliminado`, 'warning');
         } catch (error) {
           Notification(error.message, 'error');
         };

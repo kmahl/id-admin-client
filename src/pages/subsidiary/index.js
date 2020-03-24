@@ -138,7 +138,7 @@ const Subsidiary = ({ history, form }) => {
       <Spin spinning={spinning} >
         <div className="table-header subsidiary-header">
           <Title title="Lista de Sucursales"></Title>
-          <Button type="primary" onClick={(e) => setShowModal(true)}>Nuevo <Icon type="plus" /></Button>
+          <Button type="primary" onClick={createNewSubsidiary}>Nuevo <Icon type="plus" /></Button>
         </div>
         <Table /* rowSelection={rowSelection} */ dataSource={data.subsidiaries} columns={columns(editData, deleteData)} rowKey={record => record.id} />
 

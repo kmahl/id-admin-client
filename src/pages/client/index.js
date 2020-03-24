@@ -125,13 +125,13 @@ const Client = ({ history, form }) => {
 
   const deleteData = (item) => {
     confirm({
-      title: `Quieres borrar el cliente ${item.name}?`,
+      title: `Quieres borrar el cliente: ${item.name}?`,
       icon: <ExclamationCircleOutlined />,
       content: '',
       async onOk() {
         try {
           const client = await deleteClient({ variables: { id: item.id } });
-          Notification(`Usuario ${client.data.deleteClient.name} Eliminado`, 'warning');
+          Notification(`Cliente ${client.data.deleteClient.name} Eliminado`, 'warning');
         } catch (error) {
           Notification(error.message, 'error');
         };
