@@ -3,8 +3,9 @@ import { AUTH_TOKEN } from '../../constants';
 import { useMutation } from '@apollo/react-hooks';
 import gql from 'graphql-tag';
 import { withRouter } from "react-router";
-import { Form, Icon, Input, Button, Spin } from 'antd';
+import { Form, Input, Button, Spin } from 'antd';
 import { getToken } from '../../query';
+import { UserOutlined, LockOutlined } from '@ant-design/icons';
 
 const LOGIN = gql`
   mutation Login($user: String!, $password: String!) {
@@ -17,7 +18,7 @@ const LOGIN = gql`
   }
 `;
 
-const Login = ({ history, form }) => {
+const Login = ({ history }) => {
   const [password, setPassword] = useState({
     value: '',
     help: '',
@@ -27,7 +28,8 @@ const Login = ({ history, form }) => {
   const { token, loading: tokenLoading, error, client } = getToken();
   const [login] = useMutation(LOGIN);
 
-  const { getFieldDecorator, validateFields } = form;
+  const [form] = Form.useForm();
+  const { validateFields } = form;
 
   if (tokenLoading) return <Spin spinning={true}></Spin>;
   if (error) {
@@ -41,8 +43,8 @@ const Login = ({ history, form }) => {
   const onSubmit = e => {
     e.preventDefault();
     setSpin(true);
-    validateFields(async (err, { username }) => {
-      if (!err) {
+    validateFields()
+      .then(async ({ username }) => {
         try {
           if (password.value === '') {
             setPassword({
@@ -65,9 +67,8 @@ const Login = ({ history, form }) => {
             value: '',
           });
         }
-      }
-      return setSpin(false);
-    });
+      });
+    return setSpin(false);
     ;
   };
 
@@ -76,19 +77,22 @@ const Login = ({ history, form }) => {
     <div className="login-section">
       <Spin spinning={spinning} >
         <h2 className="header">Bienvenido</h2>
-        <Form onSubmit={onSubmit}>
+        <Form
+          onFinish={onSubmit}
+          form={form}
+        >
           <div className="login-form">
-            <Form.Item>
-              {getFieldDecorator('username', {
-                rules: [{ required: true, message: 'Ingresa el usuario!' }],
-              })(
-                <Input
-                  prefix={<Icon type="user" style={{ color: 'rgba(0,0,0,.25)' }} />}
-                  type="text"
-                  placeholder="User"
-                />
-              )}
+            <Form.Item
+              name="username"
+              rules={[{ required: true, message: 'Ingresa el usuario!' }]}
+            >
+              <Input
+                prefix={<UserOutlined style={{ color: 'rgba(0,0,0,.25)' }} />}
+                type="text"
+                placeholder="User"
+              />
             </Form.Item>
+            
             <Form.Item
               hasFeedback
               required={true}
@@ -99,7 +103,7 @@ const Login = ({ history, form }) => {
                 placeholder="Password"
                 onChange={e => setPassword({ value: e.target.value })}
                 value={password.value}
-                prefix={<Icon type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />}
+                prefix={<LockOutlined style={{ color: 'rgba(0,0,0,.25)' }} />}
               />
             </Form.Item>
           </div>
@@ -114,4 +118,4 @@ const Login = ({ history, form }) => {
   );
 };
 
-export default Form.create({ name: 'normal_login' })(withRouter(Login));
+export default withRouter(Login);

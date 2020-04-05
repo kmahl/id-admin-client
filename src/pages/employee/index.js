@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation } from '@apollo/react-hooks';
 import { withRouter } from "react-router";
 /* components */
-import { Icon, Input, Button, Spin, Table, Modal, Form, DatePicker, Select, notification } from 'antd';
-import { ExclamationCircleOutlined } from '@ant-design/icons';
+import { Icon, Input, Button, Spin, Table, Modal, Form, DatePicker, Select, Checkbox } from 'antd';
+import { ExclamationCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import Title from '../../components/title';
 import Notification from '../../components/notification';
 import { colors, ColorRow } from '../../components/colorSelector';
@@ -18,13 +18,16 @@ import moment from 'moment';
 import 'moment-timezone';
 /* config */
 import { columns } from './tableConfig';
+import { GET_SERVICES } from '../../query/service';
 
 
 /* employee COMPONENT */
-const employee = ({ history, form }) => {
+const employee = ({ history }) => {
   const { token } = getToken();
 
   const { loading, error, data } = useQuery(GET_EMPLOYEES);
+  const { loading: loadingService, error: errorService, data: dataService } = useQuery(GET_SERVICES);
+
   const { loading: loadingSubsidiary, error: errorSubsidiary, data: dataSubsidiary } = useQuery(GET_SUBSIDIARY_NAMES);
 
   const [spinning, setSpin] = useState(false);
@@ -42,7 +45,8 @@ const employee = ({ history, form }) => {
     refetchQueries: [{ query: GET_EMPLOYEES }],
   });
 
-  const { getFieldDecorator, validateFields, setFieldsValue, resetFields } = form;
+  const [form] = Form.useForm();
+  const { validateFields, setFieldsValue, resetFields } = form;
 
   useEffect(() => {
     if (!token) {
@@ -51,25 +55,29 @@ const employee = ({ history, form }) => {
   }, []);
 
   /* TODO: dejar el spinner fullscreen */
-  if (loading || loadingSubsidiary) return <div><Spin spinning={true}></Spin></div>;
+  if (loading || loadingSubsidiary || loadingService) return <div><Spin spinning={true}></Spin></div>;
   if (error) Notification(error.message, 'error');
   if (errorSubsidiary) Notification(errorSubsidiary.message, 'error');
+  if (errorService) Notification(errorService.message, 'error');
 
-  const prefixSelector = getFieldDecorator('prefix', {
-    initialValue: '54',
-  })(
-    <Select style={{ width: 70 }}>
-      <Select.Option value="54">+54</Select.Option>
-      <Select.Option value="58">+58</Select.Option>
-    </Select>,
+  const prefixSelector = (
+    <Form.Item
+      name={'prefix'}
+      noStyle
+    >
+      <Select style={{ width: '70' }}>
+        <Select.Option value="54">+54</Select.Option>
+        <Select.Option value="58">+58</Select.Option>
+      </Select>
+    </Form.Item>
   );
 
-  const saveEmployee = (e, isNew) => {
+  const saveEmployee = (e) => {
     e.preventDefault();
     setSpin(true);
-    validateFields(async (err, values) => {
-      try {
-        if (!err) {
+    validateFields()
+      .then(async (values) => {
+        try {
           const variables = {
             ...values,
             city: values.city || null,
@@ -79,7 +87,7 @@ const employee = ({ history, form }) => {
             country: "Argentina",
           };
           let response;
-          if (isNew) {
+          if (newEmployee) {
             response = await createEmployee({ variables });
             Notification(`Empleado ${response.data.createEmployee.name} guardado correctamente`, 'success');
           } else {
@@ -89,11 +97,14 @@ const employee = ({ history, form }) => {
           }
           resetFields();
           setShowModal(false);
+        } catch (error) {
+          console.log('\n', '===============================================', '\n');
+          console.log('error');
+          console.log(error);
+          console.log('\n', '===============================================', '\n');
+          Notification(error.message, 'error');
         }
-      } catch (error) {
-        Notification(error.message, 'error');
-      }
-    });
+      });
     return setSpin(false);
   };
 
@@ -119,7 +130,8 @@ const employee = ({ history, form }) => {
       address: data.address,
       color: data.color,
       subsidiaryId: data.subsidiary.id,
-      birth_date
+      birth_date,
+      services: data.services.map(service => service.id),
     });
   };
 
@@ -145,107 +157,141 @@ const employee = ({ history, form }) => {
     resetFields();
   };
 
+  function onChange(checkedValues) {
+    console.log('checked = ', checkedValues);
+  }
 
   return (
     <div className="employee-section">
       <Spin spinning={spinning} >
         <div className="table-header employee-header">
           <Title title="Lista de empleados"></Title>
-          <Button type="primary" onClick={createNewEmployee}>Nuevo <Icon type="plus" /></Button>
+          <Button type="primary" onClick={createNewEmployee}>Nuevo <PlusOutlined /></Button>
         </div>
-        <Table /* rowSelection={rowSelection} */ dataSource={data.employees} columns={columns(editData, deleteData)} rowKey={record => record.id} />
+        <Table /* rowSelection={rowSelection} */ dataSource={data.allEmployees} columns={columns(editData, deleteData)} rowKey={record => record.id} />
 
         <Modal
           title={modalTitle}
           visible={showModal}
-          onOk={(e) => { saveEmployee(e, newEmployee); }}
+          onOk={(e) => { saveEmployee(e); }}
           okText="Guardar"
           cancelText="Cancelar"
           onCancel={closeModal}
           width="50%"
         >
-          <Form onSubmit={saveEmployee}>
+          <Form
+            onFinish={saveEmployee}
+            form={form}
+            layout="vertical"
+            initialValues={{ prefix: '54' }}
+          >
             <div className="group">
               {/* name */}
               <Form.Item
                 label="Nombre completo"
+                name="name"
+                rules={[{ required: true, message: 'Completa el campo', whitespace: true }]}
               >
-                {getFieldDecorator('name', {
-                  rules: [{ required: true, message: 'Completa el campo', whitespace: true }],
-                })(<Input />)}
+                <Input disabled={!newEmployee} />
               </Form.Item>
               {/* email */}
-              <Form.Item label="Correo">
-                {getFieldDecorator('email', {
-                  rules: [
-                    {
-                      type: 'email',
-                      message: 'The input is not valid E-mail!',
-                    },
-                    {
-                      required: true,
-                      message: 'Please input your E-mail!',
-                    },
-                  ],
-                })(<Input />)}
+              <Form.Item
+                label="Correo"
+                name="email"
+                rules={[
+                  {
+                    type: 'email',
+                    message: 'The input is not valid E-mail!',
+                  },
+                  {
+                    required: true,
+                    message: 'Please input your E-mail!',
+                  },
+                ]}
+              >
+                <Input />
               </Form.Item>
             </div>
             <div className="group">
               {/* phone */}
-              <Form.Item label="Teléfono">
-                {getFieldDecorator('phone', {
-                })(<Input addonBefore={prefixSelector} style={{ width: '100%' }} />)}
+              <Form.Item
+                label="Teléfono"
+                name="phone"
+              >
+                <Input addonBefore={prefixSelector} style={{ width: '100%' }} />
               </Form.Item>
               {/* birthdate */}
-              <Form.Item label="Cumpleaños">
-                {getFieldDecorator('birth_date', {
-                })(<DatePicker format="DD/MM/YYYY" />)}
+              <Form.Item
+                label="Cumpleaños"
+                name="birth_date"
+                rules={[{ required: true, message: 'Completa el campo' }]}
+              >
+                <DatePicker format="DD/MM/YYYY" />
               </Form.Item>
               {/* Color */}
-              <Form.Item label="Color" style={{ width: '70%' }}>
-                {getFieldDecorator('color', {
-                  rules: [{ required: true, message: 'Completa el campo', whitespace: true }],
-                })(<Select className="color-selector">
+              <Form.Item
+                name="color"
+                label="Color"
+                style={{ width: '70%' }}
+                rules={[{ required: true, message: 'Completa el campo', whitespace: true }]}
+              >
+                <Select className="color-selector">
                   {colors.map(color =>
                     <Select.Option key={color.value} value={color.value}>
                       <ColorRow color={color} />
                     </Select.Option>)}
-                </Select >)}
+                </Select >
               </Form.Item>
             </div>
             <div className="group">
               {/* state */}
               <Form.Item
+                name="state"
                 label="Provincia"
               >
-                {getFieldDecorator('state')(<Input />)}
+                <Input />
               </Form.Item>
               {/* ciudad */}
               <Form.Item
+                name="city"
                 label="Localidad/Barrio"
               >
-                {getFieldDecorator('city', {
-                })(<Input />)}
+                <Input />
               </Form.Item>
             </div>
             <div className="group">
               {/* address */}
               <Form.Item
                 label="Dirección"
+                name="address"
+                rules={[{ required: true, message: 'Completa el campo', whitespace: true }]}
               >
-                {getFieldDecorator('address', {
-                  rules: [{ required: true, message: 'Completa el campo', whitespace: true }],
-                })(<Input />)}
+                <Input />
               </Form.Item>
               {/* subsidiary */}
-              <Form.Item label="Sucursal">
-                {getFieldDecorator('subsidiaryId', {
-                  rules: [{ required: true, message: 'Completa el campo', whitespace: true }],
-                })
-                  (dataSubsidiary.subsidiaries ?
-                    <Select>
-                      {dataSubsidiary.subsidiaries.map(subsidiary => <Select.Option key={subsidiary.id} value={subsidiary.id}>{subsidiary.name}</Select.Option>)}
-                    </Select> : <span className="alert-empty">Agrege Sucursales <a onClick={() => history.push('./subsidiary')}>Aqui!</a></span>)}
+              <Form.Item
+                label="Sucursal"
+                name="subsidiaryId"
+                rules={[{ required: true, message: 'Completa el campo', whitespace: true }]}
+              >
+                {dataSubsidiary.subsidiaries ?
+                  <Select>
+                    {dataSubsidiary.subsidiaries.map(subsidiary => <Select.Option key={subsidiary.id} value={subsidiary.id}>{subsidiary.name}</Select.Option>)}
+                  </Select> : <span className="alert-empty">Agrege Sucursales <a onClick={() => history.push('./subsidiary')}>Aqui!</a></span>}
+              </Form.Item>
+            </div>
+            <div className="group">
+              {/* services */}
+              <Form.Item
+                label="Agrega o quita los servicios que realiza el profesional"
+                name="services"
+              >
+                <Checkbox.Group
+                  options={dataService.services.map(service => ({
+                    label: service.name,
+                    value: service.id
+                  }))}
+                  onChange={onChange} />
               </Form.Item>
             </div>
             <Form.Item>
@@ -259,4 +305,4 @@ const employee = ({ history, form }) => {
   );
 };
 
-export default Form.create({ name: 'modal-employee-form' })(withRouter(employee));
+export default withRouter(employee);

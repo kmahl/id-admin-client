@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import {
   Layout,
   Menu,
-  Icon,
   Button
 } from 'antd';
 import {
@@ -13,7 +12,9 @@ import {
   ShopOutlined,
   UserOutlined,
   SettingOutlined,
-  ScissorOutlined
+  ScissorOutlined,
+  LeftCircleOutlined,
+  RightCircleOutlined
 } from '@ant-design/icons';
 const { Header, Content, Sider } = Layout;
 
@@ -112,11 +113,9 @@ const MainLayout = ({ children, history }) => {
             </Menu>
           </Sider>
           <div className="collapse-button">
-            <Icon
-              className="trigger"
-              type={collapsed ? 'left-circle' : 'right-circle'}
-              onClick={() => setCollapse(!collapsed)}
-            />
+            <a className="trigger" onClick={() => setCollapse(!collapsed)}>
+              {collapsed ? <LeftCircleOutlined /> : <RightCircleOutlined />}
+            </a>
           </div>
         </div>}
         <Layout>

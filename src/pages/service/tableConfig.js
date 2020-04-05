@@ -1,5 +1,7 @@
 import React from 'react';
-import { Icon, Divider } from 'antd';
+import { Divider } from 'antd';
+import { EditFilled, DeleteFilled} from '@ant-design/icons';
+
 import Moment from 'react-moment';
 import 'moment-timezone';
 
@@ -10,7 +12,7 @@ const timeBlock = [
   },
   {
     value: '60',
-    name: '1h'
+    name: '1h00m'
   },
   {
     value: '90',
@@ -18,11 +20,15 @@ const timeBlock = [
   },
   {
     value: '120',
-    name: '2h'
+    name: '2h00m'
   },
   {
     value: '150',
     name: '2h30m'
+  },
+  {
+    value: '180',
+    name: '3h00m'
   },
 ];
 
@@ -53,9 +59,9 @@ const columns = (editService, deleteService) => {
       key: 'action',
       render: (text, record) => (
         <span>
-          <a onClick={(e) => editService(record)} title="Editar"><Icon type="edit" theme="filled" /></a>
+          <a onClick={(e) => editService(record)} title="Editar"><EditFilled /></a>
           <Divider type="vertical" />
-          <a onClick={(e) => deleteService(record)} title="Eliminar"><Icon type="delete" theme="filled" /></a>
+          <a onClick={(e) => deleteService(record)} title="Eliminar"><DeleteFilled /></a>
         </span>
       ),
     },

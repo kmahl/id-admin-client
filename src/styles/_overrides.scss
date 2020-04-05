@@ -4,7 +4,11 @@
 
   .ant-form-item {
     width: 100%;
-    margin: 0 10px;
+    margin: 0 10px 10px;
+  }
+
+  .ant-col.ant-form-item-label {
+    padding: 0;
   }
 }
 

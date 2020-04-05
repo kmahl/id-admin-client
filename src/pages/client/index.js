@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation } from '@apollo/react-hooks';
 import { withRouter } from "react-router";
 /* components */
-import { Icon, Input, Button, Spin, Table, Modal, Form, DatePicker, Select, notification } from 'antd';
-import { ExclamationCircleOutlined } from '@ant-design/icons';
+import { Input, Button, Spin, Table, Modal, Form, DatePicker, Select, notification } from 'antd';
+import { ExclamationCircleOutlined, PlusOutlined } from '@ant-design/icons';
 const { confirm } = Modal;
 
 import Title from '../../components/title';
@@ -21,7 +21,7 @@ import { columns } from './tableConfig';
 
 
 /* CLIENT COMPONENT */
-const Client = ({ history, form }) => {
+const Client = ({ history }) => {
   const { token } = getToken();
 
   const { loading, error, data } = useQuery(GET_CLIENTS);
@@ -41,8 +41,9 @@ const Client = ({ history, form }) => {
   const [deleteClient] = useMutation(DELETE_CLIENT, {
     refetchQueries: [{ query: GET_CLIENTS }],
   });
+  const [form] = Form.useForm();
 
-  const { getFieldDecorator, validateFields, setFieldsValue, setFields, resetFields } = form;
+  const { validateFields, setFieldsValue, resetFields, setFields } = form;
 
   useEffect(() => {
     if (!token) {
@@ -55,22 +56,24 @@ const Client = ({ history, form }) => {
   if (error) Notification(error.message, 'error');
   if (errorSubsidiary) Notification(errorSubsidiary.message, 'error');
 
-  const prefixSelector = getFieldDecorator('prefix', {
-    initialValue: '54',
-  })(
-    <Select style={{ width: 70 }}>
-      <Select.Option value="54">+54</Select.Option>
-      <Select.Option value="58">+58</Select.Option>
-
-    </Select>,
+  const prefixSelector = (
+    <Form.Item
+      name={'prefix'}
+      noStyle
+    >
+      <Select style={{ width: '70' }}>
+        <Select.Option value="54">+54</Select.Option>
+        <Select.Option value="58">+58</Select.Option>
+      </Select>
+    </Form.Item>
   );
 
-  const saveClient = (e, isNew) => {
+  const saveClient = (e) => {
     e.preventDefault();
     setSpin(true);
-    validateFields(async (err, values) => {
-      try {
-        if (!err) {
+    validateFields()
+      .then(async (values) => {
+        try {
           const variables = {
             ...values,
             city: values.city || null,
@@ -80,7 +83,7 @@ const Client = ({ history, form }) => {
             country: "Argentina",
           };
           let response;
-          if (isNew) {
+          if (newClient) {
             response = await createClient({ variables });
             Notification(`Cliente ${response.data.createClient.name} guardado correctamente`, 'success');
           } else {
@@ -90,11 +93,10 @@ const Client = ({ history, form }) => {
           }
           resetFields();
           setShowModal(false);
+        } catch (error) {
+          Notification(error.message, 'error');
         }
-      } catch (error) {
-        Notification(error.message, 'error');
-      }
-    });
+      });
     return setSpin(false);
   };
 
@@ -151,90 +153,109 @@ const Client = ({ history, form }) => {
       <Spin spinning={spinning} >
         <div className="table-header client-header">
           <Title title="Lista de clientes"></Title>
-          <Button type="primary" onClick={createNewClient}>Nuevo <Icon type="plus" /></Button>
+          <Button type="primary" onClick={createNewClient}>Nuevo <PlusOutlined /></Button>
         </div>
         <Table /* rowSelection={rowSelection} */ dataSource={data.clients} columns={columns(editData, deleteData)} rowKey={record => record.id} />
 
         <Modal
           title={modalTitle}
           visible={showModal}
-          onOk={(e) => { saveClient(e, newClient); }}
+          onOk={(e) => { saveClient(e); }}
           okText="Guardar"
           cancelText="Cancelar"
           onCancel={closeModal}
           width="50%"
         >
-          <Form onSubmit={saveClient}>
+          <Form
+            onFinish={saveClient}
+            form={form}
+            layout="vertical"
+            initialValues={{ prefix: '54' }}
+          >
             <div className="group">
               {/* name */}
               <Form.Item
                 label="Nombre completo"
+                name="name"
+                rules={[{ required: true, message: 'Completa el campo!', whitespace: true }]}
               >
-                {getFieldDecorator('name', {
-                  rules: [{ required: true, message: 'Completa el campo!', whitespace: true }],
-                })(<Input />)}
+                <Input />
               </Form.Item>
+
               {/* email */}
-              <Form.Item label="Correo">
-                {getFieldDecorator('email', {
-                  rules: [
-                    {
-                      type: 'email',
-                      message: 'The input is not valid E-mail!',
-                    },
-                    {
-                      required: true,
-                      message: 'Please input your E-mail!',
-                    },
-                  ],
-                })(<Input />)}
+              <Form.Item
+                label="Correo"
+                name="email"
+                rules={[
+                  {
+                    type: 'email',
+                    message: 'The input is not valid E-mail!',
+                  },
+                  {
+                    required: true,
+                    message: 'Please input your E-mail!',
+                  },
+                ]}
+              >
+                <Input disabled={!newClient} />
               </Form.Item>
             </div>
             <div className="group">
               {/* phone */}
-              <Form.Item label="Teléfono">
-                {getFieldDecorator('phone', {
-                })(<Input addonBefore={prefixSelector} style={{ width: '100%' }} />)}
+              <Form.Item
+                label="Teléfono"
+                name={'phone'}
+              >
+                <Input addonBefore={prefixSelector} style={{ width: '100%' }} />
               </Form.Item>
+
               {/* birthdate */}
-              <Form.Item label="Cumpleaños">
-                {getFieldDecorator('birth_date', {
-                })(<DatePicker format="DD/MM/YYYY" />)}
+              <Form.Item
+                name="birth_date"
+                label="Cumpleaños"
+              >
+                <DatePicker format="DD/MM/YYYY" />
               </Form.Item>
             </div>
+
             <div className="group">
               {/* state */}
               <Form.Item
                 label="Provincia"
+                name="state"
               >
-                {getFieldDecorator('state')(<Input />)}
+                <Input />
               </Form.Item>
+
               {/* ciudad */}
               <Form.Item
                 label="Localidad/Barrio"
+                name="city"
               >
-                {getFieldDecorator('city', {
-                })(<Input />)}
+                <Input />
               </Form.Item>
             </div>
+
             <div className="group">
               {/* address */}
               <Form.Item
                 label="Dirección"
+                name="address"
+                rules={[{ required: true, message: 'Completa el campo!', whitespace: true }]}
               >
-                {getFieldDecorator('address', {
-                  rules: [{ required: true, message: 'Completa el campo!', whitespace: true }],
-                })(<Input />)}
+                <Input />
               </Form.Item>
+
               {/* subsidiary */}
-              <Form.Item label="Sucursal">
-                {getFieldDecorator('subsidiaryId', {
-                  rules: [{ required: true, message: 'Completa el campo!', whitespace: true }],
-                })
-                  (dataSubsidiary.subsidiaries ?
-                    <Select>
-                      {dataSubsidiary.subsidiaries.map(subsidiary => <Select.Option key={subsidiary.id} value={subsidiary.id}>{subsidiary.name}</Select.Option>)}
-                    </Select> : <span className="alert-empty">Agrege Sucursales <a onClick={() => history.push('./subsidiary')}>Aqui!</a></span>)}
+              <Form.Item
+                label="Sucursal"
+                name="subsidiaryId"
+                rules={[{ required: true, message: 'Completa el campo!', whitespace: true }]}
+              >
+                {dataSubsidiary.subsidiaries ?
+                  <Select>
+                    {dataSubsidiary.subsidiaries.map(subsidiary => <Select.Option key={subsidiary.id} value={subsidiary.id}>{subsidiary.name}</Select.Option>)}
+                  </Select> : <span className="alert-empty">Agrege Sucursales <a onClick={() => history.push('./subsidiary')}>Aqui!</a></span>}
               </Form.Item>
             </div>
             <Form.Item>
@@ -248,4 +269,4 @@ const Client = ({ history, form }) => {
   );
 };
 
-export default Form.create({ name: 'modal-client-form' })(withRouter(Client));
+export default withRouter(Client);

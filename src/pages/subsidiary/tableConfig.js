@@ -1,5 +1,6 @@
 import React from 'react';
-import { Icon, Divider } from 'antd';
+import { Divider } from 'antd';
+import { EditFilled, DeleteFilled} from '@ant-design/icons';
 import Moment from 'react-moment';
 import 'moment-timezone';
 
@@ -32,9 +33,9 @@ const columns = (editSubsidiary, deleteSubsidiary) => {
       key: 'action',
       render: (text, record) => (
         <span>
-          <a onClick={(e) => editSubsidiary(record)} title="Editar"><Icon type="edit" theme="filled" /></a>
+          <a onClick={(e) => editSubsidiary(record)} title="Editar"><EditFilled /></a>
           {/*         <Divider type="vertical" />
-        <a onClick={(e) => deleteSubsiduary(record)} title="Eliminar"><Icon type="delete" theme="filled" /></a> */}
+        <a onClick={(e) => deleteSubsiduary(record)} title="Eliminar"><DeleteFilled /></a> */}
         </span>
       ),
     },

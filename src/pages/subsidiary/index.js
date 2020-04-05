@@ -3,7 +3,7 @@ import { useQuery, useMutation } from '@apollo/react-hooks';
 import { withRouter } from "react-router";
 /* components */
 import { Icon, Input, Button, Spin, Table, Modal, Form, DatePicker, Select, notification } from 'antd';
-import { ExclamationCircleOutlined } from '@ant-design/icons';
+import { ExclamationCircleOutlined, PlusOutlined } from '@ant-design/icons';
 const { confirm } = Modal;
 
 import Title from '../../components/title';
@@ -17,8 +17,10 @@ import { columns } from './tableConfig';
 
 
 /* SUBSIDIARY COMPONENT */
-const Subsidiary = ({ history, form }) => {
+const Subsidiary = ({ history }) => {
   const { token } = getToken();
+
+  const [form] = Form.useForm();
 
   const { loading: loadingSubsidiary, error: errorSubsidiary, data } = useQuery(GET_SUBSIDIARIES);
 
@@ -37,7 +39,7 @@ const Subsidiary = ({ history, form }) => {
     refetchQueries: [{ query: GET_SUBSIDIARIES }],
   });
 
-  const { getFieldDecorator, validateFields, setFieldsValue, setFields, resetFields } = form;
+  const { validateFields, setFieldsValue, resetFields } = form;
 
   useEffect(() => {
     if (!token) {
@@ -49,22 +51,24 @@ const Subsidiary = ({ history, form }) => {
   if (loadingSubsidiary) return <div><Spin spinning={true}></Spin></div>;
   if (errorSubsidiary) Notification(errorSubsidiary.message, 'error');
 
-  const prefixSelector = getFieldDecorator('prefix', {
-    initialValue: '54',
-  })(
-    <Select style={{ width: 70 }}>
-      <Select.Option value="54">+54</Select.Option>
-      <Select.Option value="58">+58</Select.Option>
-
-    </Select>,
+  const prefixSelector = (
+    <Form.Item
+      name={'prefix'}
+      noStyle
+    >
+      <Select style={{ width: '70' }}>
+        <Select.Option value="54">+54</Select.Option>
+        <Select.Option value="58">+58</Select.Option>
+      </Select>
+    </Form.Item>
   );
 
-  const saveSubsidiary = (e, isNew) => {
+  const saveSubsidiary = (e) => {
     e.preventDefault();
     setSpin(true);
-    validateFields(async (err, values) => {
+    validateFields()
+    .then(async (values) => {
       try {
-        if (!err) {
           const variables = {
             ...values,
             city: values.city || null,
@@ -73,7 +77,7 @@ const Subsidiary = ({ history, form }) => {
             country: "Argentina",
           };
           let response;
-          if (isNew) {
+          if (newSubsidiary) {
             response = await createSubsidiary({ variables });
             Notification(`Sucursal ${response.data.createSubsidiary.name} guardado correctamente`, 'success');
           } else {
@@ -83,7 +87,6 @@ const Subsidiary = ({ history, form }) => {
           }
           resetFields();
           setShowModal(false);
-        }
       } catch (error) {
         Notification(error.message, 'error');
       }
@@ -111,21 +114,21 @@ const Subsidiary = ({ history, form }) => {
     });
   };
 
-   const deleteData = (item) => {
-/*     confirm({
-      title: `Quieres borrar la  ${item.name}?`,
-      icon: <ExclamationCircleOutlined />,
-      content: '',
-      async onOk() {
-        try {
-          const subsidiary = await deletesubsidiary({ variables: { id: item.id } });
-          Notification(`Usuario ${subsidiary.data.deletesubsidiary.name} Eliminado`, 'warning');
-        } catch (error) {
-          Notification(error.message, 'error');
-        };
-      },
-      onCancel() { },
-    }); */
+  const deleteData = (item) => {
+    /*     confirm({
+          title: `Quieres borrar la  ${item.name}?`,
+          icon: <ExclamationCircleOutlined />,
+          content: '',
+          async onOk() {
+            try {
+              const subsidiary = await deletesubsidiary({ variables: { id: item.id } });
+              Notification(`Usuario ${subsidiary.data.deletesubsidiary.name} Eliminado`, 'warning');
+            } catch (error) {
+              Notification(error.message, 'error');
+            };
+          },
+          onCancel() { },
+        }); */
   };
 
   const closeModal = e => {
@@ -138,60 +141,68 @@ const Subsidiary = ({ history, form }) => {
       <Spin spinning={spinning} >
         <div className="table-header subsidiary-header">
           <Title title="Lista de Sucursales"></Title>
-          <Button type="primary" onClick={createNewSubsidiary}>Nuevo <Icon type="plus" /></Button>
+          <Button type="primary" onClick={createNewSubsidiary}>Nuevo <PlusOutlined /></Button>
         </div>
         <Table /* rowSelection={rowSelection} */ dataSource={data.subsidiaries} columns={columns(editData, deleteData)} rowKey={record => record.id} />
 
         <Modal
           title={modalTitle}
           visible={showModal}
-          onOk={(e) => { saveSubsidiary(e, newSubsidiary); }}
+          onOk={(e) => { saveSubsidiary(e); }}
           okText="Guardar"
           cancelText="Cancelar"
           onCancel={closeModal}
           width="50%"
         >
-          <Form onSubmit={saveSubsidiary}>
+          <Form 
+          onFinish={saveSubsidiary}
+          form={form}
+          layout="vertical"
+          initialValues={{ prefix: '54' }}
+          >
             <div className="group">
               {/* name */}
               <Form.Item
                 label="Nombre"
+                name="name"
+                rules={[{ required: true, message: 'Completa el campo!', whitespace: true }]}
               >
-                {getFieldDecorator('name', {
-                  rules: [{ required: true, message: 'Completa el campo!', whitespace: true }],
-                })(<Input />)}
+                <Input disabled={!newSubsidiary} />
               </Form.Item>
             </div>
             <div className="group">
               {/* phone */}
-              <Form.Item label="Teléfono">
-                {getFieldDecorator('phone', {
-                })(<Input addonBefore={prefixSelector} style={{ width: '100%' }} />)}
+              <Form.Item
+                label="Teléfono"
+                name="phone"
+              >
+                <Input addonBefore={prefixSelector} style={{ width: '100%' }} />
               </Form.Item>
             </div>
             <div className="group">
               {/* state */}
               <Form.Item
                 label="Provincia"
+                name="state"
               >
-                {getFieldDecorator('state')(<Input />)}
+                <Input />
               </Form.Item>
               {/* ciudad */}
               <Form.Item
                 label="Localidad/Barrio"
+                name="city"
               >
-                {getFieldDecorator('city', {
-                })(<Input />)}
+                <Input />
               </Form.Item>
             </div>
             <div className="group">
               {/* address */}
               <Form.Item
                 label="Dirección"
+                name="address"
+                rules={[{ required: true, message: 'Completa el campo!', whitespace: true }]}
               >
-                {getFieldDecorator('address', {
-                  rules: [{ required: true, message: 'Completa el campo!', whitespace: true }],
-                })(<Input />)}
+                <Input />
               </Form.Item>
             </div>
             <Form.Item>
@@ -204,4 +215,4 @@ const Subsidiary = ({ history, form }) => {
   );
 };
 
-export default Form.create({ name: 'modal-subsidiary-form' })(withRouter(Subsidiary));
+export default withRouter(Subsidiary);

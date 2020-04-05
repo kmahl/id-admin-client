@@ -3,7 +3,7 @@ import { useQuery, useMutation } from '@apollo/react-hooks';
 import { withRouter } from "react-router";
 /* components */
 import { Icon, Input, Button, Spin, Table, Modal, Form, DatePicker, Select, notification } from 'antd';
-import { ExclamationCircleOutlined } from '@ant-design/icons';
+import { ExclamationCircleOutlined, PlusOutlined } from '@ant-design/icons';
 const { confirm } = Modal;
 
 import Title from '../../components/title';
@@ -17,7 +17,7 @@ import { columns, timeBlock } from './tableConfig';
 
 
 /* SERVICE COMPONENT */
-const Service = ({ history, form }) => {
+const Service = ({ history }) => {
   const { token } = getToken();
 
   const { loading: loadingService, error: errorService, data } = useQuery(GET_SERVICES);
@@ -37,7 +37,8 @@ const Service = ({ history, form }) => {
     refetchQueries: [{ query: GET_SERVICES }],
   });
 
-  const { getFieldDecorator, validateFields, setFieldsValue, resetFields } = form;
+  const [form] = Form.useForm();
+  const { validateFields, setFieldsValue, resetFields } = form;
 
   useEffect(() => {
     if (!token) {
@@ -49,19 +50,19 @@ const Service = ({ history, form }) => {
   if (loadingService) return <div><Spin spinning={true}></Spin></div>;
   if (errorService) Notification(errorService.message, 'error');
 
-  const saveService = (e, isNew) => {
+  const saveService = (e) => {
     e.preventDefault();
     setSpin(true);
-    validateFields(async (err, values) => {
-      try {
-        if (!err) {
+    validateFields()
+      .then(async (values) => {
+        try {
           let response;
           const variables = {
             ...values,
             cost: parseFloat(values.cost),
             duration: parseInt(values.duration)
           };
-          if (isNew) {
+          if (newService) {
             response = await createService({ variables });
             Notification(`Servicio ${response.data.createService.name} guardado correctamente`, 'success');
           } else {
@@ -71,11 +72,10 @@ const Service = ({ history, form }) => {
           }
           resetFields();
           setShowModal(false);
+        } catch (error) {
+          Notification(error.message, 'error');
         }
-      } catch (error) {
-        Notification(error.message, 'error');
-      }
-    });
+      });
     return setSpin(false);
   };
 
@@ -125,45 +125,52 @@ const Service = ({ history, form }) => {
       <Spin spinning={spinning} >
         <div className="table-header service-header">
           <Title title="Lista de Servicios"></Title>
-          <Button type="primary" onClick={createNewService}>Nuevo <Icon type="plus" /></Button>
+          <Button type="primary" onClick={createNewService}>Nuevo <PlusOutlined /></Button>
         </div>
         <Table /* rowSelection={rowSelection} */ dataSource={data.services} columns={columns(editData, deleteData)} rowKey={record => record.id} />
 
         <Modal
           title={modalTitle}
           visible={showModal}
-          onOk={(e) => { saveService(e, newService); }}
+          onOk={(e) => { saveService(e); }}
           okText="Guardar"
           cancelText="Cancelar"
           onCancel={closeModal}
           width="50%"
         >
-          <Form onSubmit={saveService}>
+          <Form
+            onFinish={saveService}
+            form={form}
+            layout="vertical"
+          >
             <div className="group">
               {/* name */}
               <Form.Item
                 label="Nombre"
+                name="name"
+                rules={[{ required: true, message: 'Completa el campo!', whitespace: true }]}
               >
-                {getFieldDecorator('name', {
-                  rules: [{ required: true, message: 'Completa el campo!', whitespace: true }],
-                })(<Input />)}
+                <Input disabled={!newService} />
               </Form.Item>
+
               {/* cost */}
               <Form.Item
                 label="Costo"
+                name="cost"
+                rules={[{ required: true, message: 'Completa el campo!', whitespace: true }]}
               >
-                {getFieldDecorator('cost', {
-                  rules: [{ required: true, message: 'Completa el campo!', whitespace: true }],
-                })(<Input prefix="$" />)}
+                <Input prefix="$" />
+
               </Form.Item>
               {/* duration */}
-              <Form.Item label="Duración (hhmm)">
-                {getFieldDecorator('duration', {
-                  rules: [{ required: true, message: 'Completa el campo', whitespace: true }],
-                })
-                  (<Select>
-                    {timeBlock.map(time => <Select.Option key={time.value} value={time.value}>{time.name}</Select.Option>)}
-                  </Select>)}
+              <Form.Item
+                label="Duración (hhmm)"
+                name="duration"
+                rules={[{ required: true, message: 'Completa el campo', whitespace: true }]}
+              >
+                <Select>
+                  {timeBlock.map(time => <Select.Option key={time.value} value={time.value}>{time.name}</Select.Option>)}
+                </Select>
               </Form.Item>
             </div>
             <Form.Item>
@@ -176,4 +183,4 @@ const Service = ({ history, form }) => {
   );
 };
 
-export default Form.create({ name: 'modal-service-form' })(withRouter(Service));
+export default withRouter(Service);

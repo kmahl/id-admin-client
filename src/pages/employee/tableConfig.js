@@ -1,5 +1,7 @@
 import React from 'react';
-import { Icon, Divider } from 'antd';
+import { Divider } from 'antd';
+import { EditFilled, DeleteFilled } from '@ant-design/icons';
+
 import Moment from 'react-moment';
 import 'moment-timezone';
 
@@ -31,16 +33,16 @@ const columns = (editEmployee, deleteEmployee) => {
     },
     {
       title: 'Sucursal',
-      dataIndex: 'subsidiary.name',
+      dataIndex: ['subsidiary','name'],
     },
     {
       title: 'Action',
       key: 'action',
       render: (text, record) => (
         <span>
-          <a onClick={(e) => editEmployee(record)} title="Editar"><Icon type="edit" theme="filled" /></a>
+          <a onClick={(e) => editEmployee(record)} title="Editar"><EditFilled /></a>
           <Divider type="vertical" />
-          <a onClick={(e) => deleteEmployee(record)} title="Eliminar"><Icon type="delete" theme="filled" /></a>
+          <a onClick={(e) => deleteEmployee(record)} title="Eliminar"><DeleteFilled /></a>
         </span>
       ),
     },
