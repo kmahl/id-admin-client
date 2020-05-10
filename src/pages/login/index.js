@@ -36,11 +36,14 @@ const Login = ({ history }) => {
     history.push('/login');
     return `Error! ${error.message}`;
   };
-  if (token) {
-    history.push(`/`);
-  }
 
-  const onSubmit = e => {
+  useState(() => {
+    if (token) {
+      history.push(`/`);
+    }
+  }, [token]);
+
+  const onSubmit = async e => {
     e.preventDefault();
     setSpin(true);
     validateFields()
@@ -58,17 +61,16 @@ const Login = ({ history }) => {
           const { token } = data.login;
           localStorage.setItem(AUTH_TOKEN, token);
           client.writeData({ data: { token } });
-          history.push(`/`);
-          return;
+          return history.push(`/`);
         } catch (error) {
           setPassword({
             validateStatus: 'error',
             help: 'Usuario o clave incorrecta!',
             value: '',
           });
+          return setSpin(false);
         }
       });
-    return setSpin(false);
     ;
   };
 
@@ -92,7 +94,7 @@ const Login = ({ history }) => {
                 placeholder="User"
               />
             </Form.Item>
-            
+
             <Form.Item
               hasFeedback
               required={true}

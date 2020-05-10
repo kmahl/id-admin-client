@@ -11,7 +11,7 @@ import { HttpLink } from 'apollo-link-http';
 import { InMemoryCache } from 'apollo-cache-inmemory';
 import { CookiesProvider } from 'react-cookie';
 
-import { AUTH_TOKEN } from './constants';
+import { AUTH_TOKEN, SUBSIDIARY_ID } from './constants';
 
 
 /* middlewares */
@@ -36,8 +36,9 @@ const client = new ApolloClient({
 cache.writeData({
   data: {
     // Acá se inicializa la data del cache
-    token :localStorage.getItem(AUTH_TOKEN),
+    token: localStorage.getItem(AUTH_TOKEN),
     userName: null,
+    subsidiaryId: localStorage.getItem(SUBSIDIARY_ID),
   }
 });
 

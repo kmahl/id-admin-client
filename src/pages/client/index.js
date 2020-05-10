@@ -12,7 +12,8 @@ import Notification from '../../components/notification';
 /* data */
 import { getToken } from '../../query';
 import { GET_CLIENTS, CREATE_CLIENT, UPDATE_CLIENT, DELETE_CLIENT } from '../../query/client';
-import { GET_SUBSIDIARY_NAMES } from '../../query/subsidiary';
+import { getSubsidiaryId } from '../../query/subsidiary';
+
 /* Time */
 import moment from 'moment';
 import 'moment-timezone';
@@ -23,9 +24,9 @@ import { columns } from './tableConfig';
 /* CLIENT COMPONENT */
 const Client = ({ history }) => {
   const { token } = getToken();
+  const { subsidiaryId } = getSubsidiaryId();
 
   const { loading, error, data } = useQuery(GET_CLIENTS);
-  const { loading: loadingSubsidiary, error: errorSubsidiary, data: dataSubsidiary } = useQuery(GET_SUBSIDIARY_NAMES);
 
   const [spinning, setSpin] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -46,15 +47,15 @@ const Client = ({ history }) => {
   const { validateFields, setFieldsValue, resetFields, setFields } = form;
 
   useEffect(() => {
+    form.resetFields();
     if (!token) {
       history.push('/login');
     }
   }, []);
 
   /* TODO: dejar el spinner fullscreen */
-  if (loading || loadingSubsidiary) return <div><Spin spinning={true}></Spin></div>;
+  if (loading) return <div><Spin spinning={true}></Spin></div>;
   if (error) Notification(error.message, 'error');
-  if (errorSubsidiary) Notification(errorSubsidiary.message, 'error');
 
   const prefixSelector = (
     <Form.Item
@@ -81,6 +82,7 @@ const Client = ({ history }) => {
             phone: (values.phone && `+${values.prefix}${values.phone}`) || null,
             birth_date: (values.birth_date && values.birth_date.format('YYYY-MM-DD')) || null,
             country: "Argentina",
+            subsidiaryId,
           };
           let response;
           if (newClient) {
@@ -120,7 +122,7 @@ const Client = ({ history }) => {
       state: data.state,
       city: data.city,
       address: data.address,
-      subsidiaryId: data.subsidiary.id,
+      subsidiaryId,
       birth_date
     });
   };
@@ -167,8 +169,8 @@ const Client = ({ history }) => {
           width="50%"
         >
           <Form
-            onFinish={saveClient}
             form={form}
+            onFinish={saveClient}
             layout="vertical"
             initialValues={{ prefix: '54' }}
           >
@@ -246,17 +248,6 @@ const Client = ({ history }) => {
                 <Input />
               </Form.Item>
 
-              {/* subsidiary */}
-              <Form.Item
-                label="Sucursal"
-                name="subsidiaryId"
-                rules={[{ required: true, message: 'Completa el campo!', whitespace: true }]}
-              >
-                {dataSubsidiary.subsidiaries ?
-                  <Select>
-                    {dataSubsidiary.subsidiaries.map(subsidiary => <Select.Option key={subsidiary.id} value={subsidiary.id}>{subsidiary.name}</Select.Option>)}
-                  </Select> : <span className="alert-empty">Agrege Sucursales <a onClick={() => history.push('./subsidiary')}>Aqui!</a></span>}
-              </Form.Item>
             </div>
             <Form.Item>
               <Button onClick={saveClient} htmlType="submit" style={{ display: 'none' }}></Button>

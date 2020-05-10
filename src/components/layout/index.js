@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { useLazyQuery } from '@apollo/react-hooks';
 import { Link } from "react-router-dom";
 import {
   Layout,
   Menu,
-  Button
+  Button,
+  Spin,
+  Select
 } from 'antd';
 import {
   HomeOutlined,
@@ -19,22 +22,54 @@ import {
 const { Header, Content, Sider } = Layout;
 
 import { getToken } from '../../query';
+import { getSubsidiaryId, GET_SUBSIDIARY_NAMES } from '../../query/subsidiary';
 import { withRouter } from "react-router";
+import { SUBSIDIARY_ID } from '../../constants';
 
 const MainLayout = ({ children, history }) => {
   const [collapsed, setCollapse] = useState(false);
-  const className = history && history.location && history.location.pathname.slice(1);
+  const [selectedSubsidiary, setSelectedSubsidiary] = useState();
+
+  let className = history && history.location && history.location.pathname.slice(1);
   const [selectedKey, setSelectedKey] = useState('/');
   const { token, client } = getToken();
+  /* subsidiary select */
+  const [getSubsidiaries, { loading: loadingSubsidiary, error: errorSubsidiary, data: dataSubsidiary }] = useLazyQuery(GET_SUBSIDIARY_NAMES);
+  const { subsidiaryId, client: clientSubsidiary } = getSubsidiaryId();
+
   const logout = () => {
     localStorage.clear();
     client.writeData({ data: { token: null } });
     history.push('/login');
   };
 
+
+  useEffect(() => {
+    if (token) {
+      if (!subsidiaryId && dataSubsidiary && dataSubsidiary.subsidiaries) {
+        if (!dataSubsidiary.subsidiaries.length > 0) {
+          // Si no hay sucursales creadas
+          history.push('/subsidiary');
+        } else {
+          clientSubsidiary.writeData({ data: { subsidiaryId: dataSubsidiary.subsidiaries[0].id } });
+          localStorage.setItem(SUBSIDIARY_ID, dataSubsidiary.subsidiaries[0].id);
+          setSelectedSubsidiary(dataSubsidiary.subsidiaries[0].id);
+        }
+      } else {
+        setSelectedSubsidiary(subsidiaryId);
+      }
+    }
+  }, [dataSubsidiary]);
+
   useEffect(() => {
     setSelectedKey(history.location.pathname);
+    if (token) {
+      getSubsidiaries();
+    }
   }, [history.location]);
+
+
+  if (loadingSubsidiary) return <div><Spin spinning={true}></Spin></div>;
 
   const menu = [
     {
@@ -73,12 +108,28 @@ const MainLayout = ({ children, history }) => {
       displayName: 'Configuración',
     },
   ];
+
+  const subsidiaryChange = value => {
+    clientSubsidiary.writeData({ data: { subsidiaryId: value } });
+    localStorage.setItem(SUBSIDIARY_ID, value);
+    setSelectedSubsidiary(value);
+  };
+
   return (
     <Layout style={{ minHeight: '100vh', height: '100vh' }}>
-      <Header className="c">
+      <Header className="header">
         <div className="logo">logo</div>
         {/* TODO: nombre, avatar, opciones */}
-        {token && <Button onClick={logout}>Salir</Button>}
+        {token && <div className="header-panel">
+          {dataSubsidiary && dataSubsidiary.subsidiaries &&
+            <div className="subsidiary">
+              <span className="label">Sucursal</span>
+              <Select value={selectedSubsidiary} label="sucursal" size="small" style={{ width: '200px' }} onChange={subsidiaryChange}>
+                {dataSubsidiary.subsidiaries.map(subsidiary => <Select.Option key={subsidiary.id} value={subsidiary.id}>{subsidiary.name}</Select.Option>)}
+              </Select>
+            </div>}
+          <Button type="link" onClick={logout}>Salir</Button>
+        </div>}
       </Header>
       <Layout>
         {token && <div style={{ display: 'flex' }}>

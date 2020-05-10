@@ -12,6 +12,7 @@ import { Modal, Form, Input, Select, Spin, TimePicker, DatePicker } from 'antd';
 import Notification from '../../components/notification';
 
 /* DATA */
+import { GET_BOOKINGS, CREATE_BOOKING, UPDATE_BOOKING, DELETE_BOOKING } from '../../query/booking';
 import { GET_EMPLOYEES, GET_EMPLOYEE } from '../../query/employee';
 import { getToken } from '../../query';
 import { GET_CLIENTS } from '../../query/client';
@@ -24,6 +25,7 @@ import { timeBlock } from '../service/tableConfig';
 const Booking = ({ history }) => {
   const { token } = getToken();
   const calendarComponentRef = React.createRef();
+  const { loading: loadingBookings, error: errorBookings, data: dataBookings } = useQuery(GET_BOOKINGS);
 
   const { loading: loadingEmployees, error: errorEmployees, data: dataEmployees } = useQuery(GET_EMPLOYEES);
   const [getEmployee, { loading: loadingEmployee, error: errorEmployee, data: employeeData }] = useLazyQuery(GET_EMPLOYEE);
@@ -31,7 +33,18 @@ const Booking = ({ history }) => {
 
   const [spinning, setSpin] = useState(false);
   const [showModal, setShowModal] = useState(false);
-  const [modalTitle, setModalTitle] = useState('Nuevo empleado');
+  const [modalTitle, setModalTitle] = useState('Nueva reserva');
+  const [newBooking, setNewBooking] = useState(true);
+
+  const [createBooking] = useMutation(CREATE_BOOKING, {
+    refetchQueries: [{ query: GET_BOOKINGS }],
+  });
+  const [updateBooking] = useMutation(UPDATE_BOOKING, {
+    refetchQueries: [{ query: GET_BOOKINGS }],
+  });
+  const [deleteBooking] = useMutation(DELETE_BOOKING, {
+    refetchQueries: [{ query: GET_BOOKINGS }],
+  });
 
   const [form] = Form.useForm();
   const { validateFields, setFieldsValue, resetFields } = form;
@@ -42,19 +55,33 @@ const Booking = ({ history }) => {
     }
   }, []);
 
+  /*   useEffect(() => {
+      if (showModal) {
+        console.log('\n', '===============================================', '\n');
+        console.log('dataEmployees.allEmployees[0].id');
+        console.log(dataEmployees.allEmployees[0].id);
+        console.log('\n', '===============================================', '\n');
+        setFieldsValue({
+          employee: dataEmployees.allEmployees[0].id,
+        });
+      }
+    }, [showModal]); */
   useEffect(() => {
     // if (employeeData?.employee?.services.length > 0) {
-    setFieldsValue({
-      service: employeeData?.employee?.services[0]?.name || '',
-      duration: employeeData?.employee?.services[0]?.duration.toString() || ''
-    });
+    setTimeout(function () {
+      setFieldsValue({
+        serviceId: employeeData?.employee?.services[0]?.id || '',
+        duration: employeeData?.employee?.services[0]?.duration.toString() || ''
+      });
+    }, 0);
 
     //  }
   }, [employeeData]);
 
   /* TODO: dejar el spinner fullscreen */
-  if (loadingEmployees || loadingClients) return <div><Spin spinning={true}></Spin></div>;
+  if (loadingEmployees || loadingClients || loadingBookings) return <div><Spin spinning={true}></Spin></div>;
   if (errorEmployee) Notification(errorEmployee.message, 'error');
+  if (errorBookings) Notification(errorBookings.message, 'error');
   if (errorClients) Notification(errorClients.message, 'error');
   if (errorEmployees) Notification(errorEmployees.message, 'error');
 
@@ -92,30 +119,21 @@ const Booking = ({ history }) => {
     if (date.date < moment().subtract(1, "days")) {
       return false;
     }
-    // modal para agregar días
+    // modal para agendar evento
     if (calendarApi.view.type === 'timeGridDay') {
-      console.log('\n', '===============================================', '\n');
-      console.log('date');
-      console.log(date);
-      console.log('\n', '===============================================', '\n');
       const start = moment(date.date).isValid() ? moment(date.date, 'DD/MM/YYYY HH:mm') : null;
-      const time = moment(date.date).format("HH:mm");
-      console.log('\n', '===============================================', '\n');
-      console.log('time');
-      console.log(time);
-      console.log('\n', '===============================================', '\n');
+      // const time = moment(date.date).format("HH:mm");
       setShowModal(true);
+      setNewBooking(true);
       setFieldsValue({
-        employee: dataEmployees.allEmployees[0].name,
-        start,
-        time: start,
+        start
       });
-
-      handleChangeEmployee(dataEmployees.allEmployees[0].id);
     } else {
       calendarApi.changeView('timeGridDay', date.dateStr);
     }
   };
+
+
 
   const eventClick = eventInfo => {
     console.log('\n', '===============================================', '\n');
@@ -125,7 +143,7 @@ const Booking = ({ history }) => {
     setShowModal(true);
     // ACA SETEAR LOS QUE TRAE YA EL EVENTO
     setFieldsValue({
-      employee: dataEmployees.allEmployees[0].name
+      employeeId: dataEmployees.allEmployees[0].id
     });
   };
 
@@ -138,17 +156,13 @@ const Booking = ({ history }) => {
     setFieldsValue({
       duration: duration.toString(),
     });
-    console.log('\n', '===============================================', '\n');
-    console.log('duration');
-    console.log(duration);
-    console.log('\n', '===============================================', '\n');
   };
 
-  const saveBooking = (e, isNew) => {
+  const saveBooking = (e) => {
     e.preventDefault();
     setSpin(true);
     validateFields()
-      .then(async (err, values) => {
+      .then(async (values) => {
         try {
           console.log('\n', '===============================================', '\n');
           console.log('values');
@@ -156,22 +170,26 @@ const Booking = ({ history }) => {
           console.log('\n', '===============================================', '\n');
           const variables = {
             ...values,
-
-            start: (values.start && values.start.format('YYYY-MM-DD')) || null,
+            duration: parseInt(values.duration),
+            // start: (values.start && values.start.format('YYYY-MM-DD')) || null,
 
           };
           let response;
-          if (isNew) {
-            response = await createClient({ variables });
-            Notification(`Cliente ${response.data.createClient.name} guardado correctamente`, 'success');
+          if (newBooking) {
+            response = await createBooking({ variables });
+            Notification(`Reserva creada correctamente`, 'success');
           } else {
-            response = await updateClient({ variables });
-            Notification(`Cliente ${response.data.updateClient.name} actualizado correctamente`, 'success');
+            response = await updateBooking({ variables });
+            Notification(`Reserva actualizada correctamente`, 'success');
 
           }
           resetFields();
           setShowModal(false);
         } catch (error) {
+          console.log('\n', '===============================================', '\n');
+          console.log('error');
+          console.log(error);
+          console.log('\n', '===============================================', '\n');
           Notification(error.message, 'error');
         }
       });
@@ -208,18 +226,19 @@ const Booking = ({ history }) => {
       width="50%"
     >
       <Form
-      /* onFinish={saveEmployee} */
+        form={form}
+        onFinish={saveBooking}
+        layout="vertical"
       >
         <div className="group">
 
           {/* client */}
           <Form.Item
             label="Cliente"
-            name="client"
+            name="clientId"
             rules={[{ required: true, message: 'Completa el campo', whitespace: true }]}
           >
             <Select
-              onChange={handleChangeEmployee}
             >
               {dataClients.clients.map(client => <Select.Option key={client.id} value={client.id}>{client.name}</Select.Option>)}
             </Select>
@@ -228,7 +247,7 @@ const Booking = ({ history }) => {
           {/* employees */}
           <Form.Item
             label="Profesional"
-            name="employee"
+            name="employeeId"
             rules={[{ required: true, message: 'Completa el campo', whitespace: true }]}
           >
             {dataEmployees.allEmployees ?
@@ -244,13 +263,14 @@ const Booking = ({ history }) => {
           {/* service */}
           <Form.Item
             label="Servicio"
-            name="service"
+            name="serviceId"
             rules={[{ required: true, message: 'Completa el campo', whitespace: true }]}
           >
             <Select
               onChange={handleChangeService}
+              disabled={!employeeData?.employee?.services}
             >
-              {employeeData?.employee?.services.map(employee => <Select.Option key={employee.id} value={employee.id}>{employee.name}</Select.Option>)}
+              {employeeData?.employee?.services.map(service => <Select.Option key={service.id} value={service.id}>{service.name}</Select.Option>)}
             </Select>
           </Form.Item>
 
@@ -268,20 +288,11 @@ const Booking = ({ history }) => {
         <div className="group">
           {/* Fecha */}
           <Form.Item
-            label="Fecha"
+            label="Fecha y hora"
             name="start"
             rules={[{ required: true, message: 'Completa el campo' }]}
           >
-            <DatePicker showToday={false} showTime={{ format: 'HH:mm', minuteStep: 30, defaultValue: moment('00:00:00', 'HH:mm') }} format="DD/MM/YYYY HH:mm" />
-          </Form.Item>
-
-          {/* Hora */}
-          <Form.Item
-            label="Hora"
-            name="time"
-            rules={[{ required: true, message: 'Completa el campo' }]}
-          >
-            <TimePicker minuteStep={30} format='HH:mm' />
+            <DatePicker showToday={false} showTime={{ format: 'HH:mm', minuteStep: 30 }} format="DD/MM/YYYY HH:mm" />
           </Form.Item>
         </div>
       </Form>

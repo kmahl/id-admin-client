@@ -1,6 +1,23 @@
 .header {
   display: flex;
-  justify-content: space-evenly;
+  justify-content: space-between;
+  align-items: center;
+
+  .subsidiary {
+    display: flex;
+    flex-direction: column;
+
+    .label {
+      font-size: 10px;
+      color: white;
+      line-height: 1.9;
+    }
+  }
+
+  .header-panel{
+    display: flex;
+    align-items: center;
+  }
 }
 
 .collapse-button {
@@ -38,7 +55,8 @@
     span {
       font-size: 18px;
     }
-    .title{
+
+    .title {
       font-size: 16px;
     }
   }

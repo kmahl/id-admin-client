@@ -1,4 +1,6 @@
+import React from 'react';
 import gql from 'graphql-tag';
+import { useQuery } from '@apollo/react-hooks';
 
 const GET_SUBSIDIARIES = gql`
 { 
@@ -61,10 +63,29 @@ const DELETE_SUBSIDIARY = gql`
   }
 `;
 
+
+const SUBSIDIARY_ID = gql`
+{
+  subsidiaryId @client
+}
+`;
+
+const getSubsidiaryId = (props) => {
+  const { data, client, loading, error } = useQuery(SUBSIDIARY_ID);
+  return {
+    loading,
+    error,
+    client,
+    subsidiaryId: data.subsidiaryId || null
+  };
+};
+
 export {
   GET_SUBSIDIARIES,
   GET_SUBSIDIARY_NAMES,
   CREATE_SUBSIDIARY,
   UPDATE_SUBSIDIARY,
   DELETE_SUBSIDIARY,
+  SUBSIDIARY_ID,
+  getSubsidiaryId,
 };

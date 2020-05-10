@@ -26,17 +26,13 @@ const Home = ({ history }) => {
   }, []);
 
   if (loading) return <Spin spinning={true}></Spin>;
-  if (error) {
-    history.push('/login');
-    return `Error! ${error.message}`;
-  };
+  if (error) Notification(error.message, 'error');
+
 
 
   return (
     <div className="home-section">
-      <Spin spinning={spinning} >
-        {data.users.map(user => (<p key={user.id}>{user.username}</p>))}
-      </Spin>
+      {data && data.users && data.users.map(user => (<p key={user.id}>{user.username}</p>))}
     </div>
   );
 };

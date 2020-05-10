@@ -12,7 +12,8 @@ const { confirm } = Modal;
 /* data */
 import { getToken } from '../../query';
 import { GET_EMPLOYEES, CREATE_EMPLOYEE, UPDATE_EMPLOYEE, DELETE_EMPLOYEE } from '../../query/employee';
-import { GET_SUBSIDIARY_NAMES } from '../../query/subsidiary';
+import { getSubsidiaryId } from '../../query/subsidiary';
+
 /* Time */
 import moment from 'moment';
 import 'moment-timezone';
@@ -24,11 +25,10 @@ import { GET_SERVICES } from '../../query/service';
 /* employee COMPONENT */
 const employee = ({ history }) => {
   const { token } = getToken();
+  const { subsidiaryId } = getSubsidiaryId();
 
   const { loading, error, data } = useQuery(GET_EMPLOYEES);
   const { loading: loadingService, error: errorService, data: dataService } = useQuery(GET_SERVICES);
-
-  const { loading: loadingSubsidiary, error: errorSubsidiary, data: dataSubsidiary } = useQuery(GET_SUBSIDIARY_NAMES);
 
   const [spinning, setSpin] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -55,9 +55,8 @@ const employee = ({ history }) => {
   }, []);
 
   /* TODO: dejar el spinner fullscreen */
-  if (loading || loadingSubsidiary || loadingService) return <div><Spin spinning={true}></Spin></div>;
+  if (loading || loadingService) return <div><Spin spinning={true}></Spin></div>;
   if (error) Notification(error.message, 'error');
-  if (errorSubsidiary) Notification(errorSubsidiary.message, 'error');
   if (errorService) Notification(errorService.message, 'error');
 
   const prefixSelector = (
@@ -85,6 +84,7 @@ const employee = ({ history }) => {
             phone: (values.phone && `+${values.prefix}${values.phone}`) || null,
             birth_date: (values.birth_date && values.birth_date.format('YYYY-MM-DD')) || null,
             country: "Argentina",
+            subsidiaryId,
           };
           let response;
           if (newEmployee) {
@@ -98,10 +98,7 @@ const employee = ({ history }) => {
           resetFields();
           setShowModal(false);
         } catch (error) {
-          console.log('\n', '===============================================', '\n');
-          console.log('error');
-          console.log(error);
-          console.log('\n', '===============================================', '\n');
+
           Notification(error.message, 'error');
         }
       });
@@ -129,7 +126,6 @@ const employee = ({ history }) => {
       city: data.city,
       address: data.address,
       color: data.color,
-      subsidiaryId: data.subsidiary.id,
       birth_date,
       services: data.services.map(service => service.id),
     });
@@ -267,17 +263,6 @@ const employee = ({ history }) => {
                 rules={[{ required: true, message: 'Completa el campo', whitespace: true }]}
               >
                 <Input />
-              </Form.Item>
-              {/* subsidiary */}
-              <Form.Item
-                label="Sucursal"
-                name="subsidiaryId"
-                rules={[{ required: true, message: 'Completa el campo', whitespace: true }]}
-              >
-                {dataSubsidiary.subsidiaries ?
-                  <Select>
-                    {dataSubsidiary.subsidiaries.map(subsidiary => <Select.Option key={subsidiary.id} value={subsidiary.id}>{subsidiary.name}</Select.Option>)}
-                  </Select> : <span className="alert-empty">Agrege Sucursales <a onClick={() => history.push('./subsidiary')}>Aqui!</a></span>}
               </Form.Item>
             </div>
             <div className="group">
