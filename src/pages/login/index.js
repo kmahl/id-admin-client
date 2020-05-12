@@ -13,6 +13,7 @@ const LOGIN = gql`
       token
       user {
         username
+        id
       }
     }
   }
@@ -26,6 +27,7 @@ const Login = ({ history }) => {
   });
   const [spinning, setSpin] = useState(false);
   const { token, loading: tokenLoading, error, client } = getToken();
+
   const [login] = useMutation(LOGIN);
 
   const [form] = Form.useForm();
@@ -58,9 +60,10 @@ const Login = ({ history }) => {
             return setSpin(false);
           }
           const { data } = await login({ variables: { user: username, password: password.value } });
-          const { token } = data.login;
+          const { token, user } = data.login;
           localStorage.setItem(AUTH_TOKEN, token);
-          client.writeData({ data: { token } });
+          client.writeData({ data: { token, user } });
+
           return history.push(`/`);
         } catch (error) {
           setPassword({

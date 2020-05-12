@@ -37,7 +37,7 @@ cache.writeData({
   data: {
     // Acá se inicializa la data del cache
     token: localStorage.getItem(AUTH_TOKEN),
-    userName: null,
+    user: null,
     subsidiaryId: localStorage.getItem(SUBSIDIARY_ID),
   }
 });

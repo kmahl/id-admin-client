@@ -13,6 +13,7 @@ const GET_BOOKINGS = gql`
       employee {
         id
         name
+        color
       }
       client{
         id
@@ -42,13 +43,14 @@ const GET_BOOKINGS = gql`
 `; */
 
 const CREATE_BOOKING = gql`
-mutation createBooking($start: String!, $duration: Int!, $clientId: ID, $employeeId: ID, $subsidiaryId: ID, $userId: ID)
+mutation createBooking($start: String!, $duration: Int!, $clientId: ID, $employeeId: ID, $subsidiaryId: ID, $userId: ID, $serviceId: ID)
 {   createBooking(
     start: $start,
     duration: $duration,
     clientId: $clientId,
     employeeId: $employeeId,
     subsidiaryId: $subsidiaryId,
+    serviceId: $serviceId,
     userId: $userId,
      ){
     id
@@ -57,7 +59,7 @@ mutation createBooking($start: String!, $duration: Int!, $clientId: ID, $employe
 `;
 
 const UPDATE_BOOKING = gql`
-mutation updateBooking($id: ID!, $start: String!, $duration: Int!, $clientId: ID, $employeeId: ID, $subsidiaryId: ID, $userId: ID)
+mutation updateBooking($id: ID!, $start: String!, $duration: Int!, $clientId: ID, $employeeId: ID, $subsidiaryId: ID, $userId: ID, $serviceId: ID)
 {   updateBooking(
     id: $id,
     start: $start,
@@ -65,6 +67,7 @@ mutation updateBooking($id: ID!, $start: String!, $duration: Int!, $clientId: ID
     clientId: $clientId,
     employeeId: $employeeId,
     subsidiaryId: $subsidiaryId,
+    serviceId: $serviceId,
     userId: $userId,
      ){
     id

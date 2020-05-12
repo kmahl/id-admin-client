@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLazyQuery } from '@apollo/react-hooks';
 import { Link } from "react-router-dom";
+
 import {
   Layout,
   Menu,
@@ -26,13 +27,16 @@ import { getSubsidiaryId, GET_SUBSIDIARY_NAMES } from '../../query/subsidiary';
 import { withRouter } from "react-router";
 import { SUBSIDIARY_ID } from '../../constants';
 
+import logoId from '../../assets/logo.jpeg';
+
 const MainLayout = ({ children, history }) => {
+
   const [collapsed, setCollapse] = useState(false);
   const [selectedSubsidiary, setSelectedSubsidiary] = useState();
 
   let className = history && history.location && history.location.pathname.slice(1);
   const [selectedKey, setSelectedKey] = useState('/');
-  const { token, client } = getToken();
+  const { token, user, client } = getToken();
   /* subsidiary select */
   const [getSubsidiaries, { loading: loadingSubsidiary, error: errorSubsidiary, data: dataSubsidiary }] = useLazyQuery(GET_SUBSIDIARY_NAMES);
   const { subsidiaryId, client: clientSubsidiary } = getSubsidiaryId();
@@ -43,9 +47,9 @@ const MainLayout = ({ children, history }) => {
     history.push('/login');
   };
 
-
   useEffect(() => {
     if (token) {
+
       if (!subsidiaryId && dataSubsidiary && dataSubsidiary.subsidiaries) {
         if (!dataSubsidiary.subsidiaries.length > 0) {
           // Si no hay sucursales creadas
@@ -118,7 +122,7 @@ const MainLayout = ({ children, history }) => {
   return (
     <Layout style={{ minHeight: '100vh', height: '100vh' }}>
       <Header className="header">
-        <div className="logo">logo</div>
+        <div className="logo"><img src={logoId}></img></div>
         {/* TODO: nombre, avatar, opciones */}
         {token && <div className="header-panel">
           {dataSubsidiary && dataSubsidiary.subsidiaries &&
@@ -128,7 +132,10 @@ const MainLayout = ({ children, history }) => {
                 {dataSubsidiary.subsidiaries.map(subsidiary => <Select.Option key={subsidiary.id} value={subsidiary.id}>{subsidiary.name}</Select.Option>)}
               </Select>
             </div>}
-          <Button type="link" onClick={logout}>Salir</Button>
+          <div className="loggon">
+            {user && <span className="user">{user.username}</span>}
+            <Button type="link" className="logout" onClick={logout}>Salir</Button>
+          </div>
         </div>}
       </Header>
       <Layout>

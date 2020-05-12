@@ -16,14 +16,40 @@ import { GET_BOOKINGS, CREATE_BOOKING, UPDATE_BOOKING, DELETE_BOOKING } from '..
 import { GET_EMPLOYEES, GET_EMPLOYEE } from '../../query/employee';
 import { getToken } from '../../query';
 import { GET_CLIENTS } from '../../query/client';
+import { getSubsidiaryId } from '../../query/subsidiary';
 
 /* Time */
 import moment from 'moment';
 import { timeBlock } from '../service/tableConfig';
 
+const formatEvents = (events) => {
+  const _events = events.map(event => {
+    return ({
+      id: event.id,
+      title: `${event.client.name}, ${event.service.name} con ${event.employee.name}`,
+      start: moment(event.start, "x").format("YYYY-MM-DD HH:mm"),
+      end: moment(event.start, "x").add(event.duration * 60 * 1000).format("YYYY-MM-DD HH:mm"),
+      color: event.employee.color,
+      extendedProps: {
+        ...event
+      }
+    });
+  });
+  _events.push({
+    start: '1900-01-01',
+    end: moment().format("YYYY-MM-DD"),
+    rendering: 'background',
+    overlap: false,
+    color: '#eee',
+  });
+
+  return _events;
+};
 
 const Booking = ({ history }) => {
-  const { token } = getToken();
+  const { token, user } = getToken();
+  const { subsidiaryId } = getSubsidiaryId();
+
   const calendarComponentRef = React.createRef();
   const { loading: loadingBookings, error: errorBookings, data: dataBookings } = useQuery(GET_BOOKINGS);
 
@@ -34,7 +60,7 @@ const Booking = ({ history }) => {
   const [spinning, setSpin] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [modalTitle, setModalTitle] = useState('Nueva reserva');
-  const [newBooking, setNewBooking] = useState(true);
+  const [bookingId, setBookingId] = useState(null);
 
   const [createBooking] = useMutation(CREATE_BOOKING, {
     refetchQueries: [{ query: GET_BOOKINGS }],
@@ -86,31 +112,12 @@ const Booking = ({ history }) => {
   if (errorEmployees) Notification(errorEmployees.message, 'error');
 
 
+
   const closeModal = e => {
     setShowModal(false);
     resetFields();
   };
 
-  const events = [
-    {
-      start: '1900-01-01',
-      end: moment().format("YYYY-MM-DD"),
-      rendering: 'background',
-      overlap: false,
-      color: '#eee',
-    },
-    {
-      id: 'a',
-      title: 'Corte',
-      start: moment().format(),
-      end: moment().add(30 * 60 * 1000).format(),
-      color: '#333',
-      extendedProps: {
-        nas: '2',
-        test: 3323,
-      }
-    }
-  ];
   // Funcion para controlar las acciones de los días
   const dateClick = date => {
     // Instancia de api
@@ -124,7 +131,7 @@ const Booking = ({ history }) => {
       const start = moment(date.date).isValid() ? moment(date.date, 'DD/MM/YYYY HH:mm') : null;
       // const time = moment(date.date).format("HH:mm");
       setShowModal(true);
-      setNewBooking(true);
+      setBookingId(null);
       setFieldsValue({
         start
       });
@@ -136,15 +143,23 @@ const Booking = ({ history }) => {
 
 
   const eventClick = eventInfo => {
-    console.log('\n', '===============================================', '\n');
-    console.log('eventInfo.event');
-    console.log(eventInfo.event);
-    console.log('\n', '===============================================', '\n');
+
     setShowModal(true);
-    // ACA SETEAR LOS QUE TRAE YA EL EVENTO
-    setFieldsValue({
-      employeeId: dataEmployees.allEmployees[0].id
-    });
+
+    const data = eventInfo.event.extendedProps;
+
+    getEmployee({ variables: { id: data.employee.id } });
+    setTimeout(function () {
+      setFieldsValue({
+        //  start: data.start,
+        duration: data.duration.toString(),
+        employeeId: data.employee.id,
+        clientId: data.client.id,
+        serviceId: data.service.id,
+        start: moment(data.start, 'x', 'DD/MM/YYYY HH:mm')
+      });
+    }, 0);
+    setBookingId(data.id);
   };
 
   const handleChangeEmployee = (value) => {
@@ -164,21 +179,19 @@ const Booking = ({ history }) => {
     validateFields()
       .then(async (values) => {
         try {
-          console.log('\n', '===============================================', '\n');
-          console.log('values');
-          console.log(values);
-          console.log('\n', '===============================================', '\n');
           const variables = {
             ...values,
             duration: parseInt(values.duration),
             // start: (values.start && values.start.format('YYYY-MM-DD')) || null,
-
+            subsidiaryId,
+            userId: user.id,
           };
           let response;
-          if (newBooking) {
+          if (!bookingId) {
             response = await createBooking({ variables });
             Notification(`Reserva creada correctamente`, 'success');
           } else {
+            variables.id = bookingId;
             response = await updateBooking({ variables });
             Notification(`Reserva actualizada correctamente`, 'success');
 
@@ -213,7 +226,7 @@ const Booking = ({ history }) => {
 
       plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
       dateClick={dateClick}
-      events={events}
+      events={formatEvents(dataBookings.bookings)}
       eventClick={eventClick}
     />
     <Modal

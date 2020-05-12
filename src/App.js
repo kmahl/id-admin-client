@@ -26,25 +26,25 @@ const App = (props) => {
             <Home />
           </Route>
           <Route exact path="/booking" >
-             <Booking />
+            <Booking />
           </Route>
           <Route exact path="/client">
-             <Client />
+            <Client />
           </Route>
           <Route exact path="/subsidiary">
-             <Subsidiary />
+            <Subsidiary />
           </Route>
           <Route exact path="/employee">
-             <Employee />
+            <Employee />
           </Route>
           <Route exact path="/service">
-             <Service />
+            <Service />
           </Route>
           <Route exact path="/configuration">
-             <Configuration />
+            <Configuration />
           </Route>
           <Route exact path="/login" >
-             <Login />
+            <Login />
           </Route>
         </Layout>
       </Switch>

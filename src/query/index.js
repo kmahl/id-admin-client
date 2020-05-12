@@ -8,16 +8,29 @@ const TOKEN = gql`
 }
 `;
 
+const CURRENT_USER = gql`
+{
+  currentUser{
+    id
+    username
+  }
+}
+`;
+
+
 const getToken = (props) => {
   const { data, client, loading, error } = useQuery(TOKEN);
-  return { 
+  const { data: userData } = useQuery(CURRENT_USER);
+  return {
     loading,
     error,
     client,
-    token: data.token || null };
+    token: data.token || null,
+    user: (userData && userData.currentUser) || null,
+  };
 };
 
 export {
   TOKEN,
-  getToken
+  getToken,
 };

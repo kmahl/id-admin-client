@@ -4,6 +4,7 @@ import { useQuery } from '@apollo/react-hooks';
 import { withRouter } from "react-router";
 import { Icon, Input, Button, Spin } from 'antd';
 import { getToken } from '../../query';
+import Notification from '../../components/notification';
 
 const GET_USERS = gql`
   {
