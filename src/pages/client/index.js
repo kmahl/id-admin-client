@@ -157,7 +157,7 @@ const Client = ({ history }) => {
           <Title title="Lista de clientes"></Title>
           <Button type="primary" onClick={createNewClient}>Nuevo <PlusOutlined /></Button>
         </div>
-        <Table /* rowSelection={rowSelection} */ dataSource={data.clients} columns={columns(editData, deleteData)} rowKey={record => record.id} />
+        <Table /* rowSelection={rowSelection} */ dataSource={data && data.clients} columns={columns(editData, deleteData)} rowKey={record => record.id} />
 
         <Modal
           title={modalTitle}

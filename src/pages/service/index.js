@@ -127,7 +127,7 @@ const Service = ({ history }) => {
           <Title title="Lista de Servicios"></Title>
           <Button type="primary" onClick={createNewService}>Nuevo <PlusOutlined /></Button>
         </div>
-        <Table /* rowSelection={rowSelection} */ dataSource={data.services} columns={columns(editData, deleteData)} rowKey={record => record.id} />
+        <Table /* rowSelection={rowSelection} */ dataSource={data && data.services} columns={columns(editData, deleteData)} rowKey={record => record.id} />
 
         <Modal
           title={modalTitle}

@@ -143,7 +143,7 @@ const Subsidiary = ({ history }) => {
           <Title title="Lista de Sucursales"></Title>
           <Button type="primary" onClick={createNewSubsidiary}>Nuevo <PlusOutlined /></Button>
         </div>
-        <Table /* rowSelection={rowSelection} */ dataSource={data.subsidiaries} columns={columns(editData, deleteData)} rowKey={record => record.id} />
+        <Table /* rowSelection={rowSelection} */ dataSource={data && data.subsidiaries} columns={columns(editData, deleteData)} rowKey={record => record.id} />
 
         <Modal
           title={modalTitle}

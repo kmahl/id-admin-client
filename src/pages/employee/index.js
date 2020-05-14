@@ -164,7 +164,7 @@ const employee = ({ history }) => {
           <Title title="Lista de empleados"></Title>
           <Button type="primary" onClick={createNewEmployee}>Nuevo <PlusOutlined /></Button>
         </div>
-        <Table /* rowSelection={rowSelection} */ dataSource={data.allEmployees} columns={columns(editData, deleteData)} rowKey={record => record.id} />
+        <Table /* rowSelection={rowSelection} */ dataSource={data && data.allEmployees} columns={columns(editData, deleteData)} rowKey={record => record.id} />
 
         <Modal
           title={modalTitle}
