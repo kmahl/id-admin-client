@@ -8,13 +8,13 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction'; // needed for dayClick
 import esLocale from '@fullcalendar/core/locales/es';
-import { Modal, Form, Input, Select, Spin, TimePicker, DatePicker } from 'antd';
+import { Modal, Form, Input, Select, Spin, DatePicker } from 'antd';
 import Notification from '../../components/notification';
 
 /* DATA */
 import { GET_BOOKINGS, CREATE_BOOKING, UPDATE_BOOKING, DELETE_BOOKING } from '../../query/booking';
 import { GET_EMPLOYEES, GET_EMPLOYEE } from '../../query/employee';
-import { getToken } from '../../query';
+import { TOKEN, CURRENT_USER } from '../../query';
 import { GET_CLIENTS } from '../../query/client';
 import { getSubsidiaryId } from '../../query/subsidiary';
 
@@ -47,7 +47,12 @@ const formatEvents = (events = []) => {
 };
 
 const Booking = ({ history }) => {
-  const { token, user } = getToken();
+  const { data: { token }, client, loading, error } = useQuery(TOKEN);
+  const { data: currentUser } = useQuery(CURRENT_USER);
+  console.log('\n', '===============================================', '\n');
+  console.log('currentUser');
+  console.log(currentUser);
+  console.log('\n', '===============================================', '\n');
   const { subsidiaryId } = getSubsidiaryId();
 
   const calendarComponentRef = React.createRef();

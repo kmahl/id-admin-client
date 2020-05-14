@@ -10,7 +10,7 @@ import Title from '../../components/title';
 import Notification from '../../components/notification';
 
 /* data */
-import { getToken } from '../../query';
+import { TOKEN } from '../../query';
 import { GET_SERVICES, CREATE_SERVICE, UPDATE_SERVICE, DELETE_SERVICE } from '../../query/service';
 /* config */
 import { columns, timeBlock } from './tableConfig';
@@ -18,7 +18,7 @@ import { columns, timeBlock } from './tableConfig';
 
 /* SERVICE COMPONENT */
 const Service = ({ history }) => {
-  const { token } = getToken();
+  const { data: { token }, client, loading, error } = useQuery(TOKEN);
 
   const { loading: loadingService, error: errorService, data } = useQuery(GET_SERVICES);
 

@@ -9,7 +9,7 @@ import Notification from '../../components/notification';
 import { colors, ColorRow } from '../../components/colorSelector';
 
 /* data */
-import { getToken } from '../../query';
+import { TOKEN } from '../../query';
 import { GET_EMPLOYEES, CREATE_EMPLOYEE, UPDATE_EMPLOYEE, DELETE_EMPLOYEE } from '../../query/employee';
 import { getSubsidiaryId } from '../../query/subsidiary';
 
@@ -24,7 +24,7 @@ const { confirm } = Modal;
 
 /* employee COMPONENT */
 const employee = ({ history }) => {
-  const { token } = getToken();
+  const { data: { token }, client, loading: loadingToken, error: errorToken } = useQuery(TOKEN);
   const { subsidiaryId } = getSubsidiaryId();
 
   const { loading, error, data } = useQuery(GET_EMPLOYEES);
@@ -55,9 +55,10 @@ const employee = ({ history }) => {
   }, []);
 
   /* TODO: dejar el spinner fullscreen */
-  if (loading || loadingService) return <div><Spin spinning={true}></Spin></div>;
+  if (loading || loadingService || loadingToken) return <div><Spin spinning={true}></Spin></div>;
   if (error) Notification(error.message, 'error');
   if (errorService) Notification(errorService.message, 'error');
+  if (errorToken) Notification(errorToken.message, 'error');
 
   const prefixSelector = (
     <Form.Item

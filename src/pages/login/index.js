@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { AUTH_TOKEN } from '../../constants';
-import { useMutation } from '@apollo/react-hooks';
+import { useQuery, useMutation } from '@apollo/react-hooks';
 import gql from 'graphql-tag';
 import { withRouter } from "react-router";
 import { Form, Input, Button, Spin } from 'antd';
-import { getToken } from '../../query';
+import { TOKEN } from '../../query';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 
 const LOGIN = gql`
@@ -26,14 +26,15 @@ const Login = ({ history }) => {
     validateStatus: '',
   });
   const [spinning, setSpin] = useState(false);
-  const { token, loading: tokenLoading, error, client } = getToken();
+  const { data: { token }, client, loading: loadingToken, error } = useQuery(TOKEN);
+
 
   const [login] = useMutation(LOGIN);
 
   const [form] = Form.useForm();
   const { validateFields } = form;
 
-  if (tokenLoading) return <Spin spinning={true}></Spin>;
+  if (loadingToken) return <Spin spinning={true}></Spin>;
   if (error) {
     history.push('/login');
     return `Error! ${error.message}`;

@@ -10,7 +10,7 @@ import Title from '../../components/title';
 import Notification from '../../components/notification';
 
 /* data */
-import { getToken } from '../../query';
+import { TOKEN } from '../../query';
 import { GET_SUBSIDIARIES, CREATE_SUBSIDIARY, UPDATE_SUBSIDIARY, DELETE_SUBSIDIARY } from '../../query/subsidiary';
 /* config */
 import { columns } from './tableConfig';
@@ -18,7 +18,7 @@ import { columns } from './tableConfig';
 
 /* SUBSIDIARY COMPONENT */
 const Subsidiary = ({ history }) => {
-  const { token } = getToken();
+  const { data: { token }, client, loading, error } = useQuery(TOKEN);
 
   const [form] = Form.useForm();
 

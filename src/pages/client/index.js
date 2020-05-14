@@ -4,13 +4,12 @@ import { withRouter } from "react-router";
 /* components */
 import { Input, Button, Spin, Table, Modal, Form, DatePicker, Select, notification } from 'antd';
 import { ExclamationCircleOutlined, PlusOutlined } from '@ant-design/icons';
-const { confirm } = Modal;
 
 import Title from '../../components/title';
 import Notification from '../../components/notification';
 
 /* data */
-import { getToken } from '../../query';
+import { TOKEN } from '../../query';
 import { GET_CLIENTS, CREATE_CLIENT, UPDATE_CLIENT, DELETE_CLIENT } from '../../query/client';
 import { getSubsidiaryId } from '../../query/subsidiary';
 
@@ -20,10 +19,11 @@ import 'moment-timezone';
 /* config */
 import { columns } from './tableConfig';
 
+const { confirm } = Modal;
 
 /* CLIENT COMPONENT */
 const Client = ({ history }) => {
-  const { token } = getToken();
+  const { data: { token }, client, loading: loadingToken, error: errorToken } = useQuery(TOKEN);
   const { subsidiaryId } = getSubsidiaryId();
 
   const { loading, error, data } = useQuery(GET_CLIENTS);
@@ -54,8 +54,9 @@ const Client = ({ history }) => {
   }, []);
 
   /* TODO: dejar el spinner fullscreen */
-  if (loading) return <div><Spin spinning={true}></Spin></div>;
+  if (loading || loadingToken) return <div><Spin spinning={true}></Spin></div>;
   if (error) Notification(error.message, 'error');
+  if (errorToken) Notification(errorToken.message, 'error');
 
   const prefixSelector = (
     <Form.Item

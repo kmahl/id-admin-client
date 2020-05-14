@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import gql from 'graphql-tag';
 import { useQuery } from '@apollo/react-hooks';
 import { withRouter } from "react-router";
-import { Icon, Input, Button, Spin } from 'antd';
-import { getToken } from '../../query';
+import { Spin } from 'antd';
+import { TOKEN } from '../../query';
 import Notification from '../../components/notification';
 
 const GET_USERS = gql`
@@ -17,7 +17,8 @@ const GET_USERS = gql`
 const Home = ({ history }) => {
   const { loading, error, data } = useQuery(GET_USERS);
   const [spinning, setSpin] = useState(false);
-  const { token } = getToken();
+  const { data: { token }, client, loading: loadingUser, error: errorUser } = useQuery(TOKEN);
+
 
 
   useEffect(() => {
@@ -26,8 +27,9 @@ const Home = ({ history }) => {
     }
   }, []);
 
-  if (loading) return <Spin spinning={true}></Spin>;
+  if (loading || loadingUser) return <Spin spinning={true}></Spin>;
   if (error) Notification(error.message, 'error');
+  if (errorUser) Notification(errorUser.message, 'error');
 
 
 

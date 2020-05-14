@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useLazyQuery } from '@apollo/react-hooks';
+import { useQuery, useLazyQuery } from '@apollo/react-hooks';
 import { Link } from "react-router-dom";
 
 import {
@@ -20,14 +20,15 @@ import {
   LeftCircleOutlined,
   RightCircleOutlined
 } from '@ant-design/icons';
-const { Header, Content, Sider } = Layout;
 
-import { getToken } from '../../query';
+import { TOKEN, CURRENT_USER } from '../../query';
 import { getSubsidiaryId, GET_SUBSIDIARY_NAMES } from '../../query/subsidiary';
 import { withRouter } from "react-router";
 import { SUBSIDIARY_ID } from '../../constants';
 
 import logoId from '../../assets/logo.jpeg';
+
+const { Header, Content, Sider } = Layout;
 
 const MainLayout = ({ children, history }) => {
 
@@ -36,7 +37,12 @@ const MainLayout = ({ children, history }) => {
 
   let className = history && history.location && history.location.pathname.slice(1);
   const [selectedKey, setSelectedKey] = useState('/');
-  const { token, user, client } = getToken();
+  const { data: { token }, client, loading, error } = useQuery(TOKEN);
+  const { data: currentUser } = useQuery(CURRENT_USER);
+  console.log('\n', '===============================================', '\n');
+  console.log('token');
+  console.log(currentUser);
+  console.log('\n', '===============================================', '\n');
   /* subsidiary select */
   const [getSubsidiaries, { loading: loadingSubsidiary, error: errorSubsidiary, data: dataSubsidiary }] = useLazyQuery(GET_SUBSIDIARY_NAMES);
   const { subsidiaryId, client: clientSubsidiary } = getSubsidiaryId();
@@ -133,7 +139,7 @@ const MainLayout = ({ children, history }) => {
               </Select>
             </div>}
           <div className="loggon">
-            {user && <span className="user">{user.username}</span>}
+            {currentUser && currentUser.user && <span className="user">{currentUser.user.username}</span>}
             <Button type="link" className="logout" onClick={logout}>Salir</Button>
           </div>
         </div>}
