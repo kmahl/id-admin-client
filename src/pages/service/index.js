@@ -4,7 +4,6 @@ import { withRouter } from "react-router";
 /* components */
 import { Icon, Input, Button, Spin, Table, Modal, Form, DatePicker, Select, notification } from 'antd';
 import { ExclamationCircleOutlined, PlusOutlined } from '@ant-design/icons';
-const { confirm } = Modal;
 
 import Title from '../../components/title';
 import Notification from '../../components/notification';
@@ -15,6 +14,7 @@ import { GET_SERVICES, CREATE_SERVICE, UPDATE_SERVICE, DELETE_SERVICE } from '..
 /* config */
 import { columns, timeBlock } from './tableConfig';
 
+const { confirm } = Modal;
 
 /* SERVICE COMPONENT */
 const Service = ({ history }) => {
