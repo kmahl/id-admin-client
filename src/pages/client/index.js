@@ -44,10 +44,9 @@ const Client = ({ history }) => {
   });
   const [form] = Form.useForm();
 
-  const { validateFields, setFieldsValue, resetFields, setFields } = form;
+  const { validateFields, setFieldsValue, resetFields } = form;
 
   useEffect(() => {
-    form.resetFields();
     if (!token) {
       history.push('/login');
     }

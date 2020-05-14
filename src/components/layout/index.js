@@ -38,11 +38,8 @@ const MainLayout = ({ children, history }) => {
   let className = history && history.location && history.location.pathname.slice(1);
   const [selectedKey, setSelectedKey] = useState('/');
   const { data: { token }, client, loading, error } = useQuery(TOKEN);
-  const { data: currentUser } = useQuery(CURRENT_USER);
-  console.log('\n', '===============================================', '\n');
-  console.log('token');
-  console.log(currentUser);
-  console.log('\n', '===============================================', '\n');
+  const { data: user } = useQuery(CURRENT_USER);
+
   /* subsidiary select */
   const [getSubsidiaries, { loading: loadingSubsidiary, error: errorSubsidiary, data: dataSubsidiary }] = useLazyQuery(GET_SUBSIDIARY_NAMES);
   const { subsidiaryId, client: clientSubsidiary } = getSubsidiaryId();
@@ -139,7 +136,7 @@ const MainLayout = ({ children, history }) => {
               </Select>
             </div>}
           <div className="loggon">
-            {currentUser && currentUser.user && <span className="user">{currentUser.user.username}</span>}
+            {user && user.currentUser && <span className="user">{user.currentUser.username}</span>}
             <Button type="link" className="logout" onClick={logout}>Salir</Button>
           </div>
         </div>}

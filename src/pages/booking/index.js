@@ -48,11 +48,8 @@ const formatEvents = (events = []) => {
 
 const Booking = ({ history }) => {
   const { data: { token }, client, loading, error } = useQuery(TOKEN);
-  const { data: currentUser } = useQuery(CURRENT_USER);
-  console.log('\n', '===============================================', '\n');
-  console.log('currentUser');
-  console.log(currentUser);
-  console.log('\n', '===============================================', '\n');
+  const { data: user } = useQuery(CURRENT_USER);
+
   const { subsidiaryId } = getSubsidiaryId();
 
   const calendarComponentRef = React.createRef();
@@ -189,7 +186,7 @@ const Booking = ({ history }) => {
             duration: parseInt(values.duration),
             // start: (values.start && values.start.format('YYYY-MM-DD')) || null,
             subsidiaryId,
-            userId: user.id,
+            userId: user && user.currentUser && user.currentUser.id,
           };
           let response;
           if (!bookingId) {
