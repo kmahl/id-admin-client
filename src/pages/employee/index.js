@@ -11,7 +11,7 @@ import { colors, ColorRow } from '../../components/colorSelector';
 /* data */
 import { TOKEN } from '../../query';
 import { GET_EMPLOYEES, CREATE_EMPLOYEE, UPDATE_EMPLOYEE, DELETE_EMPLOYEE } from '../../query/employee';
-import { getSubsidiaryId } from '../../query/subsidiary';
+import { GET_SUBSIDIARY_ID } from '../../query/subsidiary';
 
 /* Time */
 import moment from 'moment';
@@ -25,7 +25,7 @@ const { confirm } = Modal;
 /* employee COMPONENT */
 const Employee = ({ history }) => {
   const { data: { token }, client, loading: loadingToken, error: errorToken } = useQuery(TOKEN);
-  const { subsidiaryId } = getSubsidiaryId();
+  const { data: {subsidiaryId}, loading: loadingSubsidiaryId, error: errorSubsidiaryId } = useQuery(GET_SUBSIDIARY_ID);
 
   const { loading, error, data } = useQuery(GET_EMPLOYEES);
   const { loading: loadingService, error: errorService, data: dataService } = useQuery(GET_SERVICES);

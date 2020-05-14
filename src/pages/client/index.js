@@ -11,7 +11,7 @@ import Notification from '../../components/notification';
 /* data */
 import { TOKEN } from '../../query';
 import { GET_CLIENTS, CREATE_CLIENT, UPDATE_CLIENT, DELETE_CLIENT } from '../../query/client';
-import { getSubsidiaryId } from '../../query/subsidiary';
+import { GET_SUBSIDIARY_ID } from '../../query/subsidiary';
 
 /* Time */
 import moment from 'moment';
@@ -24,7 +24,8 @@ const { confirm } = Modal;
 /* CLIENT COMPONENT */
 const Client = ({ history }) => {
   const { data: { token }, client, loading: loadingToken, error: errorToken } = useQuery(TOKEN);
-  const { subsidiaryId } = getSubsidiaryId();
+  const { data: {subsidiaryId}, loading: loadingSubsidiaryId, error: errorSubsidiaryId } = useQuery(GET_SUBSIDIARY_ID);
+
 
   const { loading, error, data } = useQuery(GET_CLIENTS);
 

@@ -64,21 +64,21 @@ const DELETE_SUBSIDIARY = gql`
 `;
 
 
-const SUBSIDIARY_ID = gql`
+const GET_SUBSIDIARY_ID = gql`
 {
   subsidiaryId @client
 }
 `;
 
-const getSubsidiaryId = (props) => {
-  const { data, client, loading, error } = useQuery(SUBSIDIARY_ID);
+/* const getSubsidiaryId = (props) => {
+  const { data: {subsidiaryId}, client, loading: loadingSubsidiaryId, error: errorSubsidiaryId } = useQuery(SUBSIDIARY_ID);
   return {
     loading,
     error,
     client,
     subsidiaryId: data.subsidiaryId || null
   };
-};
+}; */
 
 export {
   GET_SUBSIDIARIES,
@@ -86,6 +86,5 @@ export {
   CREATE_SUBSIDIARY,
   UPDATE_SUBSIDIARY,
   DELETE_SUBSIDIARY,
-  SUBSIDIARY_ID,
-  getSubsidiaryId,
+  GET_SUBSIDIARY_ID,
 };

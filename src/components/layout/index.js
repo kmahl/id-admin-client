@@ -22,7 +22,7 @@ import {
 } from '@ant-design/icons';
 
 import { TOKEN, CURRENT_USER } from '../../query';
-import { getSubsidiaryId, GET_SUBSIDIARY_NAMES } from '../../query/subsidiary';
+import { GET_SUBSIDIARY_ID, GET_SUBSIDIARY_NAMES } from '../../query/subsidiary';
 import { withRouter } from "react-router";
 import { SUBSIDIARY_ID } from '../../constants';
 
@@ -42,7 +42,7 @@ const MainLayout = ({ children, history }) => {
 
   /* subsidiary select */
   const [getSubsidiaries, { loading: loadingSubsidiary, error: errorSubsidiary, data: dataSubsidiary }] = useLazyQuery(GET_SUBSIDIARY_NAMES);
-  const { subsidiaryId, client: clientSubsidiary } = getSubsidiaryId();
+  const { data: { subsidiaryId }, loading: loadingSubsidiaryId, error: errorSubsidiaryId } = useQuery(GET_SUBSIDIARY_ID);
 
   const logout = () => {
     localStorage.clear();

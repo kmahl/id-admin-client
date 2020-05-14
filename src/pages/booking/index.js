@@ -16,7 +16,7 @@ import { GET_BOOKINGS, CREATE_BOOKING, UPDATE_BOOKING, DELETE_BOOKING } from '..
 import { GET_EMPLOYEES, GET_EMPLOYEE } from '../../query/employee';
 import { TOKEN, CURRENT_USER } from '../../query';
 import { GET_CLIENTS } from '../../query/client';
-import { getSubsidiaryId } from '../../query/subsidiary';
+import { GET_SUBSIDIARY_ID } from '../../query/subsidiary';
 
 /* Time */
 import moment from 'moment';
@@ -50,7 +50,7 @@ const Booking = ({ history }) => {
   const { data: { token }, client, loading, error } = useQuery(TOKEN);
   const { data: user } = useQuery(CURRENT_USER);
 
-  const { subsidiaryId } = getSubsidiaryId();
+  const { data: {subsidiaryId}, loading: loadingSubsidiaryId, error: errorSubsidiaryId } = useQuery(GET_SUBSIDIARY_ID);
 
   const calendarComponentRef = React.createRef();
   const { loading: loadingBookings, error: errorBookings, data: dataBookings } = useQuery(GET_BOOKINGS);
