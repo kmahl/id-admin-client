@@ -40,11 +40,9 @@ const Login = ({ history }) => {
     return `Error! ${error.message}`;
   };
 
-  useState(() => {
-    if (token) {
-      history.push(`/`);
-    }
-  }, [token]);
+  if (token) {
+    history.push(`/`);
+  }
 
   const onSubmit = async e => {
     e.preventDefault();
