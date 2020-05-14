@@ -23,7 +23,7 @@ import { GET_SERVICES } from '../../query/service';
 const { confirm } = Modal;
 
 /* employee COMPONENT */
-const employee = ({ history }) => {
+const Employee = ({ history }) => {
   const { data: { token }, client, loading: loadingToken, error: errorToken } = useQuery(TOKEN);
   const { subsidiaryId } = getSubsidiaryId();
 
@@ -290,4 +290,4 @@ const employee = ({ history }) => {
   );
 };
 
-export default withRouter(employee);
+export default withRouter(Employee);
