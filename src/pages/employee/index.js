@@ -272,7 +272,7 @@ const employee = ({ history }) => {
                 name="services"
               >
                 <Checkbox.Group
-                  options={dataService.services.map(service => ({
+                  options={dataService && dataService.services.map(service => ({
                     label: service.name,
                     value: service.id
                   }))}

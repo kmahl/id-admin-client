@@ -22,7 +22,7 @@ import { getSubsidiaryId } from '../../query/subsidiary';
 import moment from 'moment';
 import { timeBlock } from '../service/tableConfig';
 
-const formatEvents = (events) => {
+const formatEvents = (events = []) => {
   const _events = events.map(event => {
     return ({
       id: event.id,
@@ -226,7 +226,7 @@ const Booking = ({ history }) => {
 
       plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
       dateClick={dateClick}
-      events={formatEvents(dataBookings.bookings)}
+      events={formatEvents(dataBookings && dataBookings.bookings)}
       eventClick={eventClick}
     />
     <Modal
@@ -253,7 +253,7 @@ const Booking = ({ history }) => {
           >
             <Select
             >
-              {dataClients.clients.map(client => <Select.Option key={client.id} value={client.id}>{client.name}</Select.Option>)}
+              {dataClients && dataClients.clients.map(client => <Select.Option key={client.id} value={client.id}>{client.name}</Select.Option>)}
             </Select>
           </Form.Item>
 
@@ -263,7 +263,7 @@ const Booking = ({ history }) => {
             name="employeeId"
             rules={[{ required: true, message: 'Completa el campo', whitespace: true }]}
           >
-            {dataEmployees.allEmployees ?
+            {dataEmployees && dataEmployees.allEmployees ?
               <Select
                 onChange={handleChangeEmployee}
               >
