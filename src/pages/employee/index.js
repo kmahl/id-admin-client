@@ -7,7 +7,6 @@ import { ExclamationCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import Title from '../../components/title';
 import Notification from '../../components/notification';
 import { colors, ColorRow } from '../../components/colorSelector';
-const { confirm } = Modal;
 
 /* data */
 import { getToken } from '../../query';
@@ -21,6 +20,7 @@ import 'moment-timezone';
 import { columns } from './tableConfig';
 import { GET_SERVICES } from '../../query/service';
 
+const { confirm } = Modal;
 
 /* employee COMPONENT */
 const employee = ({ history }) => {
