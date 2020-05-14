@@ -41,11 +41,11 @@ const Subsidiary = ({ history }) => {
 
   const { validateFields, setFieldsValue, resetFields } = form;
 
-  useEffect(() => {
-    if (!token) {
-      history.push('/login');
-    }
-  }, []);
+
+  if (!token) {
+    history.push('/login');
+  }
+
 
   /* TODO: dejar el spinner fullscreen */
   if (loadingSubsidiary) return <div><Spin spinning={true}></Spin></div>;
@@ -67,8 +67,8 @@ const Subsidiary = ({ history }) => {
     e.preventDefault();
     setSpin(true);
     validateFields()
-    .then(async (values) => {
-      try {
+      .then(async (values) => {
+        try {
           const variables = {
             ...values,
             city: values.city || null,
@@ -87,10 +87,10 @@ const Subsidiary = ({ history }) => {
           }
           resetFields();
           setShowModal(false);
-      } catch (error) {
-        Notification(error.message, 'error');
-      }
-    });
+        } catch (error) {
+          Notification(error.message, 'error');
+        }
+      });
     return setSpin(false);
   };
 
@@ -154,11 +154,11 @@ const Subsidiary = ({ history }) => {
           onCancel={closeModal}
           width="50%"
         >
-          <Form 
-          onFinish={saveSubsidiary}
-          form={form}
-          layout="vertical"
-          initialValues={{ prefix: '54' }}
+          <Form
+            onFinish={saveSubsidiary}
+            form={form}
+            layout="vertical"
+            initialValues={{ prefix: '54' }}
           >
             <div className="group">
               {/* name */}

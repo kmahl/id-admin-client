@@ -46,11 +46,11 @@ const Client = ({ history }) => {
 
   const { validateFields, setFieldsValue, resetFields } = form;
 
-  useEffect(() => {
-    if (!token) {
-      history.push('/login');
-    }
-  }, []);
+
+  if (!token) {
+    history.push('/login');
+  }
+
 
   /* TODO: dejar el spinner fullscreen */
   if (loading || loadingToken) return <div><Spin spinning={true}></Spin></div>;

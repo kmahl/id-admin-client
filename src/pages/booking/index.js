@@ -77,11 +77,11 @@ const Booking = ({ history }) => {
   const [form] = Form.useForm();
   const { validateFields, setFieldsValue, resetFields } = form;
 
-  useEffect(() => {
-    if (!token) {
-      history.push('/login');
-    }
-  }, []);
+
+  if (!token) {
+    history.push('/login');
+  }
+
 
   /*   useEffect(() => {
       if (showModal) {

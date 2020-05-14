@@ -40,11 +40,11 @@ const Service = ({ history }) => {
   const [form] = Form.useForm();
   const { validateFields, setFieldsValue, resetFields } = form;
 
-  useEffect(() => {
-    if (!token) {
-      history.push('/login');
-    }
-  }, []);
+
+  if (!token) {
+    history.push('/login');
+  }
+
 
   /* TODO: dejar el spinner fullscreen */
   if (loadingService) return <div><Spin spinning={true}></Spin></div>;

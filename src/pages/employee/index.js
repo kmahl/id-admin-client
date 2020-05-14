@@ -48,14 +48,13 @@ const employee = ({ history }) => {
   const [form] = Form.useForm();
   const { validateFields, setFieldsValue, resetFields } = form;
 
-  useEffect(() => {
-    if (!token) {
-      history.push('/login');
-    }
-  }, []);
+
+  if (!token) {
+    history.push('/login');
+  }
 
   /* TODO: dejar el spinner fullscreen */
-  if (loading || loadingService || loadingToken) return <div><Spin spinning={true}></Spin></div>;
+  if (loading || loadingService || loadingToken) return <div><Spin spinning={true}></Spin></div>;
   if (error) Notification(error.message, 'error');
   if (errorService) Notification(errorService.message, 'error');
   if (errorToken) Notification(errorToken.message, 'error');

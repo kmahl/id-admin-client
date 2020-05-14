@@ -21,13 +21,13 @@ const Home = ({ history }) => {
 
 
 
-  useEffect(() => {
-    if (!token) {
-      history.push('/login');
-    }
-  }, []);
 
-  if (loading || loadingUser) return <Spin spinning={true}></Spin>;
+  if (!token) {
+    history.push('/login');
+  }
+
+
+  if (loading || loadingUser) return <Spin spinning={true}></Spin>;
   if (error) Notification(error.message, 'error');
   if (errorUser) Notification(errorUser.message, 'error');
 
