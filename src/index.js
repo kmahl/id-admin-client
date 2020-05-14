@@ -18,7 +18,7 @@ import { AUTH_TOKEN, SUBSIDIARY_ID } from './constants';
 import { authMiddleware, errorLink } from './middlewares';
 
 // const httpLink = new HttpLink({ uri: "http://localhost:4000/graphql" });
-const httpLink = new HttpLink({ uri: "http://ec2-3-21-134-39.us-east-2.compute.amazonaws.com:4000/graphql" });
+const httpLink = new HttpLink({ uri: "http://ec2-3-15-213-201.us-east-2.compute.amazonaws.com:4000/graphql" });
 
 
 const link = from([
