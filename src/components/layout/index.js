@@ -42,7 +42,7 @@ const MainLayout = ({ children, history }) => {
 
   /* subsidiary select */
   const [getSubsidiaries, { loading: loadingSubsidiary, error: errorSubsidiary, data: dataSubsidiary }] = useLazyQuery(GET_SUBSIDIARY_NAMES);
-  const { data: { subsidiaryId }, loading: loadingSubsidiaryId, error: errorSubsidiaryId } = useQuery(GET_SUBSIDIARY_ID);
+  const { data: { subsidiaryId }, client: clientSubsidiary, loading: loadingSubsidiaryId, error: errorSubsidiaryId } = useQuery(GET_SUBSIDIARY_ID);
 
   const logout = () => {
     localStorage.clear();
