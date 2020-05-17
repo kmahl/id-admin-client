@@ -7,6 +7,7 @@ const GET_CLIENTS = gql`
       name
       email
       address
+      document
       birth_date
       phone
       city
