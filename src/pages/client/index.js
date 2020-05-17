@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useQuery, useMutation } from '@apollo/react-hooks';
 import { withRouter } from "react-router";
 /* components */
-import { Input, Button, Spin, Table, Modal, Form, DatePicker, Select, notification } from 'antd';
+import { Input, Button, Spin, Table, Modal, Form, DatePicker, Select } from 'antd';
 import { ExclamationCircleOutlined, PlusOutlined } from '@ant-design/icons';
 
 import Title from '../../components/title';
@@ -23,8 +23,8 @@ const { confirm } = Modal;
 
 /* CLIENT COMPONENT */
 const Client = ({ history }) => {
-  const { data: { token }, client, loading: loadingToken, error: errorToken } = useQuery(TOKEN);
-  const { data: {subsidiaryId}, loading: loadingSubsidiaryId, error: errorSubsidiaryId } = useQuery(GET_SUBSIDIARY_ID);
+  const { data: { token }, loading: loadingToken, error: errorToken } = useQuery(TOKEN);
+  const { data: { subsidiaryId }, loading: loadingSubsidiaryId, error: errorSubsidiaryId } = useQuery(GET_SUBSIDIARY_ID);
 
 
   const { loading, error, data } = useQuery(GET_CLIENTS);
@@ -54,9 +54,10 @@ const Client = ({ history }) => {
 
 
   /* TODO: dejar el spinner fullscreen */
-  if (loading || loadingToken) return <div><Spin spinning={true}></Spin></div>;
+  if (loading || loadingToken || loadingSubsidiaryId) return <div><Spin spinning={true}></Spin></div>;
   if (error) Notification(error.message, 'error');
   if (errorToken) Notification(errorToken.message, 'error');
+  if (errorSubsidiaryId) Notification(errorSubsidiaryId.message, 'error');
 
   const prefixSelector = (
     <Form.Item
@@ -119,6 +120,7 @@ const Client = ({ history }) => {
       prefix: data.phone ? data.phone.slice(1, 3) : '54',
       name: data.name,
       email: data.email,
+      document: data.document,
       phone: data.phone ? data.phone.slice(3, data.phone.length) : '',
       state: data.state,
       city: data.city,
@@ -204,6 +206,15 @@ const Client = ({ history }) => {
               </Form.Item>
             </div>
             <div className="group">
+              {/* DOCUMENTO */}
+              <Form.Item
+                label="DNI"
+                name="document"
+                rules={[{ required: true, message: 'Completa el campo!', whitespace: true }]}
+              >
+                <Input />
+              </Form.Item>
+
               {/* phone */}
               <Form.Item
                 label="Teléfono"
