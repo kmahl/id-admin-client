@@ -21,10 +21,11 @@ const GET_CLIENTS = gql`
 `;
 
 const CREATE_CLIENT = gql`
-mutation createClient($address: String, $birth_date: String, $city: String, $country: String, $email: String!, $name: String!, $phone: String, $state: String, $subsidiaryId: ID)
+mutation createClient($address: String, $birth_date: String, $document: String, $city: String, $country: String, $email: String!, $name: String!, $phone: String, $state: String, $subsidiaryId: ID)
 {   createClient(
      address: $address,
      birth_date: $birth_date,
+     document: $document,
      city: $city,
      country: $country,
      email: $email,
@@ -39,10 +40,11 @@ mutation createClient($address: String, $birth_date: String, $city: String, $cou
 `;
 
 const UPDATE_CLIENT = gql`
-mutation updateClient($address: String, $birth_date: String, $city: String, $country: String, $email: String!, $name: String!, $phone: String, $state: String, $subsidiaryId: ID)
+mutation updateClient($address: String, $birth_date: String, $document: String, $city: String, $country: String, $email: String!, $name: String!, $phone: String, $state: String, $subsidiaryId: ID)
 {   updateClient(
      address: $address,
      birth_date: $birth_date,
+     document: $document,
      city: $city,
      country: $country,
      email: $email,
