@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useQuery, useMutation } from '@apollo/react-hooks';
 import { withRouter } from "react-router";
 /* components */
-import { Icon, Input, Button, Spin, Table, Modal, Form, DatePicker, Select, notification } from 'antd';
-import { ExclamationCircleOutlined, PlusOutlined } from '@ant-design/icons';
+import { Input, Button, Spin, Table, Modal, Form, Select } from 'antd';
+import { PlusOutlined } from '@ant-design/icons';
 
 import Title from '../../components/title';
 import Notification from '../../components/notification';
@@ -14,11 +14,10 @@ import { GET_SUBSIDIARIES, CREATE_SUBSIDIARY, UPDATE_SUBSIDIARY, DELETE_SUBSIDIA
 /* config */
 import { columns } from './tableConfig';
 
-const { confirm } = Modal;
 
 /* SUBSIDIARY COMPONENT */
 const Subsidiary = ({ history }) => {
-  const { data: { token }, client, loading, error } = useQuery(TOKEN);
+  const { data: { token } } = useQuery(TOKEN);
 
   const [form] = Form.useForm();
 

@@ -24,7 +24,7 @@ const { confirm } = Modal;
 
 /* employee COMPONENT */
 const Employee = ({ history }) => {
-  const { data: { token }, client, loading: loadingToken, error: errorToken } = useQuery(TOKEN);
+  const { data: { token }, loading: loadingToken, error: errorToken } = useQuery(TOKEN);
   const { data: {subsidiaryId}, loading: loadingSubsidiaryId, error: errorSubsidiaryId } = useQuery(GET_SUBSIDIARY_ID);
 
   const { loading, error, data } = useQuery(GET_EMPLOYEES);
@@ -54,10 +54,11 @@ const Employee = ({ history }) => {
   }
 
   /* TODO: dejar el spinner fullscreen */
-  if (loading || loadingService || loadingToken) return <div><Spin spinning={true}></Spin></div>;
+  if (loading || loadingService || loadingToken || loadingSubsidiaryId) return <div><Spin spinning={true}></Spin></div>;
   if (error) Notification(error.message, 'error');
   if (errorService) Notification(errorService.message, 'error');
   if (errorToken) Notification(errorToken.message, 'error');
+  if (errorSubsidiaryId) Notification(errorSubsidiaryId.message, 'error');
 
   const prefixSelector = (
     <Form.Item

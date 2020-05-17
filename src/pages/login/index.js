@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { AUTH_TOKEN } from '../../constants';
 import { useQuery, useMutation } from '@apollo/react-hooks';
 import gql from 'graphql-tag';

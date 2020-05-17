@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation } from '@apollo/react-hooks';
 import { withRouter } from "react-router";
 /* components */
-import { Icon, Input, Button, Spin, Table, Modal, Form, DatePicker, Select, notification } from 'antd';
+import { Icon, Input, Button, Spin, Table, Modal, Form, Select } from 'antd';
 import { ExclamationCircleOutlined, PlusOutlined } from '@ant-design/icons';
 
 import Title from '../../components/title';
@@ -18,7 +18,7 @@ const { confirm } = Modal;
 
 /* SERVICE COMPONENT */
 const Service = ({ history }) => {
-  const { data: { token }, client, loading, error } = useQuery(TOKEN);
+  const { data: { token } } = useQuery(TOKEN);
 
   const { loading: loadingService, error: errorService, data } = useQuery(GET_SERVICES);
 

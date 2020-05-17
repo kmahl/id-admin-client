@@ -16,8 +16,7 @@ const GET_USERS = gql`
 `;
 const Home = ({ history }) => {
   const { loading, error, data } = useQuery(GET_USERS);
-  const [spinning, setSpin] = useState(false);
-  const { data: { token }, client, loading: loadingUser, error: errorUser } = useQuery(TOKEN);
+  const { data: { token }, loading: loadingUser, error: errorUser } = useQuery(TOKEN);
 
 
 

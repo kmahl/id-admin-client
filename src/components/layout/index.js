@@ -37,12 +37,12 @@ const MainLayout = ({ children, history }) => {
 
   let className = history && history.location && history.location.pathname.slice(1);
   const [selectedKey, setSelectedKey] = useState('/');
-  const { data: { token }, client, loading, error } = useQuery(TOKEN);
+  const { data: { token }, client} = useQuery(TOKEN);
   const { data: user } = useQuery(CURRENT_USER);
 
   /* subsidiary select */
-  const [getSubsidiaries, { loading: loadingSubsidiary, error: errorSubsidiary, data: dataSubsidiary }] = useLazyQuery(GET_SUBSIDIARY_NAMES);
-  const { data: { subsidiaryId }, client: clientSubsidiary, loading: loadingSubsidiaryId, error: errorSubsidiaryId } = useQuery(GET_SUBSIDIARY_ID);
+  const [getSubsidiaries, { loading: loadingSubsidiary, data: dataSubsidiary }] = useLazyQuery(GET_SUBSIDIARY_NAMES);
+  const { data: { subsidiaryId }, client: clientSubsidiary } = useQuery(GET_SUBSIDIARY_ID);
 
   const logout = () => {
     localStorage.clear();

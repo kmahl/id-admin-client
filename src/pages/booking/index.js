@@ -8,7 +8,7 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction'; // needed for dayClick
 import esLocale from '@fullcalendar/core/locales/es';
-import { Modal, Form, Input, Select, Spin, DatePicker } from 'antd';
+import { Modal, Form, Select, Spin, DatePicker } from 'antd';
 import Notification from '../../components/notification';
 
 /* DATA */
@@ -47,10 +47,10 @@ const formatEvents = (events = []) => {
 };
 
 const Booking = ({ history }) => {
-  const { data: { token }, client, loading, error } = useQuery(TOKEN);
+  const { data: { token } } = useQuery(TOKEN);
   const { data: user } = useQuery(CURRENT_USER);
 
-  const { data: {subsidiaryId}, loading: loadingSubsidiaryId, error: errorSubsidiaryId } = useQuery(GET_SUBSIDIARY_ID);
+  const { data: { subsidiaryId }, loading: loadingSubsidiaryId, error: errorSubsidiaryId } = useQuery(GET_SUBSIDIARY_ID);
 
   const calendarComponentRef = React.createRef();
   const { loading: loadingBookings, error: errorBookings, data: dataBookings } = useQuery(GET_BOOKINGS);
@@ -107,13 +107,12 @@ const Booking = ({ history }) => {
   }, [employeeData]);
 
   /* TODO: dejar el spinner fullscreen */
-  if (loadingEmployees || loadingClients || loadingBookings) return <div><Spin spinning={true}></Spin></div>;
+  if (loadingEmployees || loadingClients || loadingBookings || loadingSubsidiaryId || loadingEmployee) return <div><Spin spinning={true}></Spin></div>;
   if (errorEmployee) Notification(errorEmployee.message, 'error');
   if (errorBookings) Notification(errorBookings.message, 'error');
   if (errorClients) Notification(errorClients.message, 'error');
   if (errorEmployees) Notification(errorEmployees.message, 'error');
-
-
+  if (errorSubsidiaryId) Notification(errorSubsidiaryId.message, 'error');
 
   const closeModal = e => {
     setShowModal(false);
