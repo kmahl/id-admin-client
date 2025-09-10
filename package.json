@@ -33,7 +33,7 @@
     "react-dom": "^16.12.0",
     "react-moment": "^0.9.7",
     "react-router-dom": "^5.1.2",
-    "react-scripts": "3.4.0"
+    "react-scripts": "5.0.1"
   },
   "scripts": {
     "start": "react-app-rewired --max_old_space_size=2048 start",
